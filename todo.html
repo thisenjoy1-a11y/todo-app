@@ -257,14 +257,22 @@
       background: #fff; border-radius: 20px; padding: 32px 28px;
       max-width: 420px; width: 90%;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18); animation: popIn 0.25s ease;
-      max-height: 90vh; overflow-y: auto;
+      max-height: 90vh; overflow-y: auto; position: relative;
     }
     @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
     .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .modal-header h2 { font-size: 1.15rem; color: #1a1a2e; }
-    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #aaa; padding: 12px; min-width: 48px; min-height: 48px; display: flex; align-items: center; justify-content: center; }
-    .modal-close:hover { color: #e74c3c; }
+    .modal-close {
+      position: absolute; top: 12px; right: 12px;
+      background: #f0f0f0; border: none; border-radius: 50%;
+      font-size: 1.3rem; cursor: pointer; color: #555;
+      width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-close:hover, .modal-close:active { background: #e74c3c; color: #fff; }
 
     .modal-date { font-size: 0.8rem; color: #aaa; margin-bottom: 16px; }
 
@@ -364,9 +372,9 @@
   <!-- 브리핑 모달 -->
   <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
     <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeBriefing()">✕</button>
       <div class="modal-header">
         <h2>☀️ 오늘 브리핑</h2>
-        <button class="modal-close" onclick="closeBriefing()">✕</button>
       </div>
       <p class="modal-date" id="modal-date"></p>
 
@@ -529,7 +537,6 @@
       if (!t) return;
       t[field] = value;
 
-      // UI 즉시 업데이트
       if (field === 'text') {
         const textEl = document.querySelector(`[data-id="${id}"] .todo-text`);
         if (textEl) textEl.textContent = value;
@@ -555,7 +562,6 @@
         if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; }
       }
 
-      // DB 업데이트 (디바운스 500ms)
       const fieldMap = { text: 'title', done: 'completed', detail: 'description', priority: 'priority', time: 'time' };
       const dbField = fieldMap[field];
       if (!dbField) return;
@@ -573,7 +579,6 @@
       const t = todos.find(t => t.id === id);
       if (!t) return;
 
-      // DOM에서 직접 현재 값 읽기
       const item = document.querySelector(`[data-id="${id}"]`);
       if (item) {
         const textarea = item.querySelector('.memo-textarea');
@@ -584,14 +589,12 @@
         if (titleInput) t.text = titleInput.value;
       }
 
-      // 디바운스 타이머 모두 클리어
       ['text', 'detail', 'priority', 'time'].forEach(field => {
         clearTimeout(_debounceTimers[id + field]);
         delete _debounceTimers[id + field];
         delete _pendingUpdates[id + '|' + field];
       });
 
-      // Supabase에 저장
       const { error } = await sb.from('todos').update({
         title: t.text,
         description: t.detail,
@@ -844,7 +847,6 @@
 
     const ELEVEN_API_KEY = 'a47960161d014a167261f504c3d9e72f9522b47769e115902e88d706828fd702';
     const ELEVEN_VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
-    let audioCtx = null;
     let currentSource = null;
 
     async function startTTS() {
@@ -852,7 +854,6 @@
       const text = buildBriefingText();
       if (!text) return;
 
-      // iOS: Audio 객체를 유저 제스처 직후 동기적으로 생성해야 재생 권한 유지
       const audio = new Audio();
       currentSource = audio;
 
@@ -892,7 +893,7 @@
     }
 
     function stopTTS() {
-      if (currentSource) { currentSource.stop(); currentSource = null; }
+      if (currentSource) { currentSource.pause(); currentSource.currentTime = 0; currentSource = null; }
       window.speechSynthesis.cancel();
       const el = document.getElementById('tts-status');
       if (el) el.textContent = '⏹ 중지됨';
