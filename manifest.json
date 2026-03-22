@@ -1,0 +1,20 @@
+{
+  "name": "투두 캘린더",
+  "short_name": "투두",
+  "description": "할 일과 캘린더를 한눈에, 오전 7시 음성 브리핑",
+  "start_url": "./todo.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f2f5",
+  "theme_color": "#6c63ff",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="100" fill="#6c63ff"/>
+  <!-- 캘린더 본체 -->
+  <rect x="96" y="130" width="320" height="280" rx="24" fill="white"/>
+  <!-- 헤더 -->
+  <rect x="96" y="130" width="320" height="80" rx="24" fill="#574fd6"/>
+  <rect x="96" y="178" width="320" height="32" fill="#574fd6"/>
+  <!-- 날짜 고리 왼쪽 -->
+  <rect x="168" y="98" width="28" height="60" rx="14" fill="white"/>
+  <!-- 날짜 고리 오른쪽 -->
+  <rect x="316" y="98" width="28" height="60" rx="14" fill="white"/>
+  <!-- 헤더 흰 선 (요일 구분) -->
+  <line x1="96" y1="210" x2="416" y2="210" stroke="white" stroke-width="2" opacity="0.3"/>
+  <!-- 날짜 점들 -->
+  <circle cx="168" cy="272" r="14" fill="#6c63ff"/>
+  <circle cx="228" cy="272" r="14" fill="#e0e0e0"/>
+  <circle cx="288" cy="272" r="14" fill="#e0e0e0"/>
+  <circle cx="348" cy="272" r="14" fill="#e0e0e0"/>
+  <circle cx="168" cy="332" r="14" fill="#e0e0e0"/>
+  <circle cx="228" cy="332" r="14" fill="#ff8c42"/>
+  <circle cx="288" cy="332" r="14" fill="#e0e0e0"/>
+  <circle cx="348" cy="332" r="14" fill="#e0e0e0"/>
+  <!-- 체크마크 -->
+  <polyline points="160,272 166,278 178,264" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
