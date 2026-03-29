@@ -238,7 +238,6 @@
     }
     .banner.hidden { display: none; }
 
-    /* 로딩 */
     .loading-msg {
       text-align: center; color: #6c63ff; padding: 24px 0;
       font-size: 0.9rem; animation: pulse 1.2s infinite;
@@ -328,7 +327,7 @@
 
   <div class="top-bar">
     <h1>📅 투두 캘린더</h1>
-    <button class="briefing-btn" onclick="showBriefing()">☀️ 오늘 브리핑</button>
+    <button class="briefing-btn" onclick="showBriefing(true)">☀️ 오늘 브리핑</button>
     <button class="sync-btn" id="sync-btn" onclick="syncTodos()">🔄 새로고침</button>
   </div>
 
@@ -395,16 +394,10 @@
   </div>
 
   <script>
-    // ══════════════════════════════════════
-    // Supabase 초기화
-    // ══════════════════════════════════════
     const SUPABASE_URL = 'https://dyskcxfcmpuscpmlrfho.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BPaXqHIp7GS2ZJp3tFIKsg_MyXaGisU';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ══════════════════════════════════════
-    // 상태
-    // ══════════════════════════════════════
     let todos = [];
     let filter = 'all';
     let selectedDate = null;
@@ -435,16 +428,11 @@
       };
     }
 
-    // ══════════════════════════════════════
-    // DB 로드
-    // ══════════════════════════════════════
     async function loadTodos() {
       const list = document.getElementById('todo-list');
       list.innerHTML = '<li class="loading-msg">⏳ 불러오는 중...</li>';
-
       const { data, error } = await sb.from('todos').select('*').order('created_at', { ascending: true });
       if (error) {
-        console.error('로드 오류:', error);
         list.innerHTML = '<li class="empty-msg">❌ 로드 실패. 새로고침 해주세요.</li>';
         return;
       }
@@ -462,26 +450,16 @@
       btn.classList.remove('syncing');
     }
 
-    // ══════════════════════════════════════
-    // 투두 CRUD
-    // ══════════════════════════════════════
     async function addTodo() {
       const input = document.getElementById('todo-input');
       const dateInput = document.getElementById('todo-date');
       const text = input.value.trim();
       if (!text) { input.focus(); return; }
       const date = dateInput.value || selectedDate || todayStr();
-
       const { data, error } = await sb.from('todos').insert({
-        title: text,
-        date: date,
-        completed: false,
-        description: '',
-        priority: 'normal',
-        time: ''
+        title: text, date: date, completed: false, description: '', priority: 'normal', time: ''
       }).select().single();
-
-      if (error) { console.error('추가 오류:', error); alert('추가 실패. 다시 시도해주세요.'); return; }
+      if (error) { alert('추가 실패. 다시 시도해주세요.'); return; }
       input.value = '';
       todos.push(mapFromDB(data));
       renderCalendar();
@@ -494,16 +472,14 @@
       if (!t) return;
       const newDone = !t.done;
       const { error } = await sb.from('todos').update({ completed: newDone }).eq('id', id);
-      if (error) { console.error('토글 오류:', error); return; }
+      if (error) return;
       t.done = newDone;
-
       filter = 'all';
       const filterBtns = document.querySelectorAll('.filters button');
       filterBtns.forEach((b, i) => {
         if (i === 0) b.classList.add('active');
         else b.classList.remove('active');
       });
-
       expandedId = id;
       renderCalendar();
       renderTodos();
@@ -511,7 +487,7 @@
 
     async function remove(id) {
       const { error } = await sb.from('todos').delete().eq('id', id);
-      if (error) { console.error('삭제 오류:', error); return; }
+      if (error) return;
       todos = todos.filter(t => t.id !== id);
       if (expandedId === id) expandedId = null;
       renderCalendar();
@@ -527,7 +503,6 @@
       const t = todos.find(t => t.id === id);
       if (!t) return;
       t[field] = value;
-
       if (field === 'text') {
         const textEl = document.querySelector(`[data-id="${id}"] .todo-text`);
         if (textEl) textEl.textContent = value;
@@ -552,24 +527,20 @@
         const tag = document.querySelector(`[data-id="${id}"] .time-tag`);
         if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; }
       }
-
       const fieldMap = { text: 'title', done: 'completed', detail: 'description', priority: 'priority', time: 'time' };
       const dbField = fieldMap[field];
       if (!dbField) return;
-
       _pendingUpdates[id + '|' + field] = { dbField, value };
       clearTimeout(_debounceTimers[id + field]);
       _debounceTimers[id + field] = setTimeout(async () => {
         delete _pendingUpdates[id + '|' + field];
-        const { error } = await sb.from('todos').update({ [dbField]: value }).eq('id', id);
-        if (error) console.error('업데이트 오류:', error);
+        await sb.from('todos').update({ [dbField]: value }).eq('id', id);
       }, 500);
     }
 
     async function flushPending(id) {
       const t = todos.find(t => t.id === id);
       if (!t) return;
-
       const item = document.querySelector(`[data-id="${id}"]`);
       if (item) {
         const textarea = item.querySelector('.memo-textarea');
@@ -579,20 +550,14 @@
         const titleInput = item.querySelector('.todo-detail input[type="text"]');
         if (titleInput) t.text = titleInput.value;
       }
-
       ['text', 'detail', 'priority', 'time'].forEach(field => {
         clearTimeout(_debounceTimers[id + field]);
         delete _debounceTimers[id + field];
         delete _pendingUpdates[id + '|' + field];
       });
-
-      const { error } = await sb.from('todos').update({
-        title: t.text,
-        description: t.detail,
-        time: t.time,
-        priority: t.priority
+      await sb.from('todos').update({
+        title: t.text, description: t.detail, time: t.time, priority: t.priority
       }).eq('id', id);
-      if (error) console.error('저장 오류:', error);
     }
 
     function setFilter(f, btn) {
@@ -608,24 +573,18 @@
       renderCalendar(); renderTodos();
     }
 
-    // ══════════════════════════════════════
-    // 투두 렌더
-    // ══════════════════════════════════════
     function renderTodos() {
       const list = document.getElementById('todo-list');
       const title = document.getElementById('todo-panel-title');
-
       let base = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
       base = base.filter(t => filter === 'all' ? true : filter === 'done' ? t.done : !t.done);
       base.sort((a, b) => a.date.localeCompare(b.date));
-
       if (selectedDate) {
         const [, m, d] = selectedDate.split('-');
         title.textContent = `📋 ${parseInt(m)}월 ${parseInt(d)}일`;
       } else {
         title.textContent = '📋 전체 할 일';
       }
-
       if (base.length === 0) {
         list.innerHTML = `<li class="empty-msg">할 일이 없습니다 🎉</li>`;
       } else {
@@ -634,7 +593,6 @@
           const priLabel = { high: '높음', normal: '보통', low: '낮음' }[pri];
           const isOpen = expandedId === t.id;
           const hasNote = (t.detail || '').trim().length > 0;
-
           return `<li class="todo-item ${t.done ? 'done' : ''}" data-id="${t.id}">
             <div class="todo-main">
               <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
@@ -651,7 +609,6 @@
               <button class="expand-btn ${isOpen ? 'open' : ''}" onclick="toggleExpand('${t.id}')" title="상세 보기">▼</button>
               <button class="delete-btn" onclick="remove('${t.id}')">✕</button>
             </div>
-
             <div class="todo-detail ${isOpen ? 'open' : ''}">
               <div class="detail-row">
                 <span class="detail-label">제목</span>
@@ -678,7 +635,6 @@
           </li>`;
         }).join('');
       }
-
       const src = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
       const done = src.filter(t => t.done).length;
       document.getElementById('summary').textContent =
@@ -692,46 +648,37 @@
       return `${m}월 ${d}일 (${dows[new Date(y, m-1, d).getDay()]})`;
     }
 
-    // ══════════════════════════════════════
-    // 캘린더 렌더
-    // ══════════════════════════════════════
     function renderCalendar() {
       document.getElementById('cal-title').textContent = `${viewYear}년 ${viewMonth+1}월`;
       const grid = document.getElementById('cal-grid');
       const dows = ['일','월','화','수','목','금','토'];
       let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-
       const firstDay = new Date(viewYear, viewMonth, 1).getDay();
       const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
       for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
-
       const dotMap = {};
       todos.forEach(t => {
         if (!dotMap[t.date]) dotMap[t.date] = { total: 0, done: 0 };
         dotMap[t.date].total++;
         if (t.done) dotMap[t.date].done++;
       });
-
       for (let d = 1; d <= daysInMonth; d++) {
         const m = String(viewMonth+1).padStart(2,'0');
         const dd = String(d).padStart(2,'0');
         const dateStr = `${viewYear}-${m}-${dd}`;
         const dow = (firstDay + d - 1) % 7;
         const info = dotMap[dateStr];
-
         let dotHtml = '';
         if (info) {
           const u = info.total - info.done;
           for (let i = 0; i < Math.min(u, 3); i++) dotHtml += `<div class="dot"></div>`;
           for (let i = 0; i < Math.min(info.done, 3 - Math.min(u, 3)); i++) dotHtml += `<div class="dot done"></div>`;
         }
-
         const cls = ['cal-day',
           dateStr === todayStr() ? 'today' : '',
           dateStr === selectedDate ? 'selected' : '',
           dow === 0 ? 'sunday' : '', dow === 6 ? 'saturday' : ''
         ].filter(Boolean).join(' ');
-
         html += `<div class="${cls}" onclick="selectDate('${dateStr}')">
           <div class="day-num">${d}</div>
           <div class="dot-row">${dotHtml}</div>
@@ -747,30 +694,23 @@
       renderCalendar();
     }
 
-    // ══════════════════════════════════════
-    // 브리핑 모달
-    // ══════════════════════════════════════
-    function showBriefing() {
+    function showBriefing(autoRead = false) {
       const ts = todayStr();
       const [y, m, d] = ts.split('-').map(Number);
       const dows = ['일','월','화','수','목','금','토'];
       document.getElementById('modal-date').textContent =
         `${y}년 ${m}월 ${d}일 (${dows[new Date(y, m-1, d).getDay()]})`;
-
       const todayTodos = todos.filter(t => t.date === ts && !t.done);
       const overdue    = todos.filter(t => t.date < ts  && !t.done);
       const totalDone  = todos.filter(t => t.done).length;
-
       _briefingTodayTodos = todayTodos;
       _briefingOverdue    = overdue;
-
       document.getElementById('modal-stats').innerHTML = `
         <div class="stat-box"><div class="num">${todayTodos.length}</div><div class="label">오늘 할 일</div></div>
         <div class="stat-box ${overdue.length > 0 ? 'danger' : ''}">
           <div class="num">${overdue.length}</div><div class="label">미완료 지난 일</div>
         </div>
         <div class="stat-box"><div class="num">${totalDone}</div><div class="label">완료됨</div></div>`;
-
       document.getElementById('modal-today-list').innerHTML = todayTodos.length === 0
         ? `<div class="briefing-empty">오늘 예정된 할 일이 없어요 😊</div>`
         : todayTodos.map(t => {
@@ -784,7 +724,6 @@
               ${t.detail ? `<div style="margin-top:5px;font-size:0.8rem;color:#777;white-space:pre-wrap;">${esc(t.detail)}</div>` : ''}
             </div>`;
           }).join('');
-
       const overdueSection = document.getElementById('modal-overdue-section');
       if (overdue.length === 0) {
         overdueSection.style.display = 'none';
@@ -793,9 +732,9 @@
         document.getElementById('modal-overdue-list').innerHTML =
           overdue.map(t => `<div class="briefing-item overdue">
             ⚠️ ${esc(t.text)}<div class="b-date">${fmtLabel(t.date)}</div>
+            ${t.detail ? `<div style="margin-top:4px;font-size:0.78rem;color:#aaa;">${esc(t.detail)}</div>` : ''}
           </div>`).join('');
       }
-
       document.getElementById('modal-overlay').classList.add('show');
       document.getElementById('tts-status').textContent = '🔊 ▶ 재생 버튼을 눌러 브리핑 시작';
     }
@@ -809,23 +748,26 @@
       if (e.target === document.getElementById('modal-overlay')) closeBriefing();
     }
 
-    // ══════════════════════════════════════
-    // TTS
-    // ══════════════════════════════════════
     function buildBriefingText() {
       const h = new Date().getHours();
       const greeting = h < 11 ? '좋은 아침이에요' : h < 18 ? '안녕하세요' : '안녕하세요';
       let text = `${greeting}. `;
-
       if (_briefingTodayTodos.length === 0 && _briefingOverdue.length === 0) {
         text += '오늘은 예정된 할 일이 없어요. 좋은 하루 보내세요!';
       } else {
         if (_briefingTodayTodos.length > 0) {
           text += `오늘 할 일이 ${_briefingTodayTodos.length}개 있습니다. `;
-          _briefingTodayTodos.forEach((t, i) => { text += `${i+1}번, ${t.text}. `; });
+          _briefingTodayTodos.forEach((t, i) => {
+            text += `${i+1}번, ${t.text}. `;
+            if (t.detail) text += `메모: ${t.detail}. `;
+          });
         }
         if (_briefingOverdue.length > 0) {
-          text += `주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. 확인해주세요.`;
+          text += `주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. `;
+          _briefingOverdue.forEach((t, i) => {
+            text += `${i+1}번, ${t.text}. `;
+            if (t.detail) text += `메모: ${t.detail}. `;
+          });
         }
       }
       return text;
@@ -839,11 +781,9 @@
       const statusEl = document.getElementById('tts-status');
       const text = buildBriefingText();
       if (!text) return;
-
       const audio = new Audio();
       currentSource = audio;
       statusEl.textContent = '⏳ 음성 생성 중...';
-
       try {
         const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`, {
           method: 'POST',
@@ -858,16 +798,13 @@
             voice_settings: { stability: 0.5, similarity_boost: 0.75 }
           })
         });
-
         if (!res.ok) throw new Error('API 오류 ' + res.status);
-
         const blob = await res.blob();
         audio.src = URL.createObjectURL(blob);
         audio.onplay = () => { statusEl.textContent = '🔊 음성 재생 중...'; };
         audio.onended = () => { statusEl.textContent = '✅ 재생 완료'; };
         audio.onerror = () => { statusEl.textContent = '❌ 재생 오류'; };
         await audio.play();
-
       } catch (e) {
         console.error(e);
         statusEl.textContent = '❌ 오류 (API 키 또는 네트워크 확인)';
@@ -880,15 +817,12 @@
       if (el) el.textContent = '⏹ 중지됨';
     }
 
-    // ══════════════════════════════════════
-    // 오전 7시 자동 브리핑
-    // ══════════════════════════════════════
     function checkBriefingTime() {
       const now = new Date();
       const todayKey = 'briefing_' + todayStr();
       if (now.getHours() === 7 && now.getMinutes() === 0 && !localStorage.getItem(todayKey)) {
         localStorage.setItem(todayKey, '1');
-        showBriefing();
+        showBriefing(true);
       }
     }
     setInterval(checkBriefingTime, 30000);
@@ -896,25 +830,19 @@
     async function init() {
       renderCalendar();
       await loadTodos();
-
       const now = new Date();
       const todayKey = 'briefing_' + todayStr();
-
       if (new URLSearchParams(window.location.search).get('briefing') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
-        showBriefing();
+        showBriefing(true);
         return;
       }
-
       if (now.getHours() >= 7 && !localStorage.getItem(todayKey)) {
         localStorage.setItem(todayKey, '1');
-        showBriefing();
+        showBriefing(true);
       }
     }
 
-    // ══════════════════════════════════════
-    // 브라우저 알림
-    // ══════════════════════════════════════
     function requestNotifPermission() {
       Notification.requestPermission().then(perm => {
         if (perm === 'granted') {
@@ -923,11 +851,7 @@
       });
     }
 
-    // ══════════════════════════════════════
-    // PWA 설치
-    // ══════════════════════════════════════
     let deferredInstallPrompt = null;
-
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       deferredInstallPrompt = e;
@@ -947,9 +871,6 @@
       document.getElementById('install-banner').classList.add('hidden');
     });
 
-    // ══════════════════════════════════════
-    // 서비스 워커 등록
-    // ══════════════════════════════════════
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(() => {
         if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
@@ -958,9 +879,6 @@
       });
     }
 
-    // ══════════════════════════════════════
-    // 공통 유틸
-    // ══════════════════════════════════════
     function esc(str) {
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
