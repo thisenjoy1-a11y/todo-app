@@ -99,13 +99,13 @@
     .banner.hidden { display: none; }
     .loading-msg { text-align: center; color: #6c63ff; padding: 24px 0; font-size: 0.9rem; animation: pulse 1.2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; cursor: pointer; }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 20px; padding: 32px 28px; max-width: 420px; width: 90%; box-shadow: 0 8px 40px rgba(0,0,0,0.18); animation: popIn 0.25s ease; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal { background: #fff; border-radius: 20px; padding: 32px 28px; max-width: 420px; width: 90%; box-shadow: 0 8px 40px rgba(0,0,0,0.18); animation: popIn 0.25s ease; max-height: 90vh; overflow-y: auto; position: relative; cursor: default; }
     @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .modal-header h2 { font-size: 1.15rem; color: #1a1a2e; }
-    .modal-close { position: absolute; top: 12px; right: 12px; background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: #555; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; z-index: 200; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .modal-close { position: absolute; top: 12px; right: 12px; background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: #555; width: 48px; height: 48px; min-width: 48px; min-height: 48px; display: flex; align-items: center; justify-content: center; z-index: 200; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .modal-close:hover, .modal-close:active { background: #e74c3c; color: #fff; }
     .modal-date { font-size: 0.8rem; color: #aaa; margin-bottom: 16px; }
     .tts-bar { display: flex; align-items: center; gap: 8px; background: #f4f3ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; }
@@ -126,7 +126,7 @@
     .briefing-item.overdue { border-left-color: #e74c3c; }
     .b-date { font-size: 0.75rem; color: #999; margin-top: 2px; }
     .briefing-empty { font-size: 0.88rem; color: #bbb; text-align: center; padding: 12px 0; }
-    .modal-footer { text-align: center; margin-top: 4px; }
+    .modal-footer { text-align: center; margin-top: 4px; padding-bottom: 4px; }
     .modal-footer button { padding: 14px 32px; background: #6c63ff; color: #fff; border: none; border-radius: 12px; font-size: 1rem; cursor: pointer; font-weight: 700; transition: background 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; position: relative; z-index: 200; display: inline-block; }
     .modal-footer button:hover, .modal-footer button:active { background: #574fd6; }
     @media (max-width: 660px) { .layout { flex-direction: column; } }
@@ -177,8 +177,8 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
-    <div class="modal" id="modal">
+  <div class="modal-overlay" id="modal-overlay" onclick="closeBriefing()">
+    <div class="modal" id="modal" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeBriefing()">✕</button>
       <div class="modal-header">
         <h2>☀️ 오늘 브리핑</h2>
@@ -410,7 +410,6 @@
     }
 
     function closeBriefing() { stopTTS(); document.getElementById('modal-overlay').classList.remove('show'); }
-    function closeModalOutside(e) { if (e.target===document.getElementById('modal-overlay')) closeBriefing(); }
 
     function buildBriefingText() {
       const h = new Date().getHours();
