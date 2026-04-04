@@ -76,13 +76,13 @@
     }
     .cal-header button:hover { background: #f0eeff; }
 
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, auto); gap: 4px; }
     .cal-dow { text-align: center; font-size: 0.72rem; font-weight: 600; color: #aaa; padding: 4px 0; }
 
     .cal-day {
       position: relative; text-align: center; padding: 8px 2px 4px;
       border-radius: 10px; cursor: pointer; font-size: 0.85rem;
-      color: #333; transition: background 0.15s; min-height: 48px;
+      color: #333; transition: background 0.15s; height: 52px;
     }
     .cal-day:hover { background: #f0eeff; }
     .cal-day.empty { cursor: default; } .cal-day.empty:hover { background: none; }
@@ -1058,7 +1058,4 @@
       if (e.target === this) closeBriefing();
     });
 
-    init();
-  </script>
-</body>
-</html>
+    ini
