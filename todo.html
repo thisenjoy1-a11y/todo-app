@@ -14,11 +14,14 @@
     if (!location.search.includes('briefing=1')) return;
     window._briefingMode = true;
 
-    // ① speechSynthesis 프라이밍 (WebKit은 Blink 제한 미적용)
+    // ① speechSynthesis 프라이밍: 긴 무음 utterance로 오디오 세션 유지
+    // (page 로딩 완료 후 prefetchTTS가 cancel()로 끊고 실제 텍스트 speak)
     if ('speechSynthesis' in window) {
       try {
-        var u = new SpeechSynthesisUtterance('\u00a0');
-        u.volume = 0; u.rate = 10;
+        var u = new SpeechSynthesisUtterance(
+          '잠시만요 잠시만요 잠시만요 잠시만요 잠시만요 잠시만요 잠시만요 잠시만요 잠시만요 잠시만요'
+        );
+        u.volume = 0; u.lang = 'ko-KR';
         speechSynthesis.speak(u);
         window._synthPrimed = true;
       } catch(e) {}
