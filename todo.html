@@ -726,10 +726,9 @@
         </div>`;
       }
       const totalCells = firstDay + daysInMonth;
-      const remainder = totalCells % 7;
-      if (remainder > 0) {
-        for (let i = 0; i < 7 - remainder; i++) html += `<div class="cal-day empty"></div>`;
-      }
+      const paddedTotal = Math.ceil(totalCells / 7) * 7;
+      const targetTotal = paddedTotal <= 35 ? 42 : (paddedTotal <= 42 ? 42 : 42);
+      for (let i = totalCells; i < targetTotal; i++) html += `<div class="cal-day empty"></div>`;
       grid.innerHTML = html;
     }
 
@@ -1058,4 +1057,7 @@
       if (e.target === this) closeBriefing();
     });
 
-    ini
+    init();
+  </script>
+</body>
+</html>
