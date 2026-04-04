@@ -55,73 +55,26 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
-
-    .top-bar {
-      display: flex; align-items: center; justify-content: center;
-      gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
-    }
-
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 32px 16px; }
+    .top-bar { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
     h1 { font-size: 1.6rem; color: #1a1a2e; }
-
-    .briefing-btn {
-      padding: 8px 16px; background: #ff8c42; color: #fff;
-      border: none; border-radius: 10px; font-size: 0.85rem;
-      cursor: pointer; font-weight: 600; transition: background 0.2s;
-    }
+    .briefing-btn { padding: 8px 16px; background: #ff8c42; color: #fff; border: none; border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
     .briefing-btn:hover { background: #e07030; }
-
-    .sync-btn {
-      padding: 8px 16px; background: #28a745; color: #fff;
-      border: none; border-radius: 10px; font-size: 0.85rem;
-      cursor: pointer; font-weight: 600; transition: background 0.2s;
-    }
+    .sync-btn { padding: 8px 16px; background: #28a745; color: #fff; border: none; border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
     .sync-btn:hover { background: #218838; }
     .sync-btn.syncing { opacity: 0.7; cursor: not-allowed; }
-
-    .layout {
-      display: flex; gap: 24px; max-width: 900px;
-      margin: 0 auto; align-items: flex-start; flex-wrap: wrap;
-    }
-
-    /* ── 캘린더 ── */
-    .calendar-card {
-      background: #fff; border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 320px;
-    }
-
-    .cal-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
-    }
+    .layout { display: flex; gap: 24px; max-width: 900px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
+    .calendar-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 320px; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .cal-header span { font-size: 1rem; font-weight: 700; color: #1a1a2e; }
-    .cal-header button {
-      background: none; border: none; font-size: 1.2rem;
-      cursor: pointer; color: #6c63ff; padding: 4px 10px;
-      border-radius: 8px; transition: background 0.2s;
-    }
+    .cal-header button { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6c63ff; padding: 4px 10px; border-radius: 8px; transition: background 0.2s; }
     .cal-header button:hover { background: #f0eeff; }
-
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .cal-dow { text-align: center; font-size: 0.72rem; font-weight: 600; color: #aaa; padding: 4px 0; }
-
-    .cal-day {
-      position: relative; text-align: center; padding: 8px 2px 4px;
-      border-radius: 10px; cursor: pointer; font-size: 0.85rem;
-      color: #333; transition: background 0.15s; min-height: 48px;
-    }
+    .cal-day { position: relative; text-align: center; padding: 8px 2px 4px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; color: #333; transition: background 0.15s; min-height: 48px; }
     .cal-day:hover { background: #f0eeff; }
     .cal-day.empty { cursor: default; } .cal-day.empty:hover { background: none; }
-    .cal-day.today .day-num {
-      background: #6c63ff; color: #fff; border-radius: 50%;
-      width: 26px; height: 26px; display: flex;
-      align-items: center; justify-content: center; margin: 0 auto;
-    }
+    .cal-day.today .day-num { background: #6c63ff; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
     .cal-day.selected { background: #ede9ff; }
     .cal-day.sunday .day-num { color: #e74c3c; }
     .cal-day.saturday .day-num { color: #3498db; }
@@ -129,235 +82,95 @@
     .dot-row { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
     .dot { width: 5px; height: 5px; border-radius: 50%; background: #6c63ff; }
     .dot.done { background: #aaa; }
-
-    /* ── 투두 패널 ── */
-    .todo-card {
-      background: #fff; border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 300px;
-    }
+    .todo-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 300px; }
     .todo-card h2 { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; }
-
     .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .input-group input[type="text"] {
-      padding: 11px 14px; border: 2px solid #e0e0e0;
-      border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
-    }
+    .input-group input[type="text"] { padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
     .input-group input[type="text"]:focus { border-color: #6c63ff; }
     .input-row2 { display: flex; gap: 8px; }
-    .input-group input[type="date"] {
-      flex: 1; padding: 10px 12px; border: 2px solid #e0e0e0;
-      border-radius: 10px; font-size: 0.88rem; outline: none;
-      color: #333; transition: border-color 0.2s;
-    }
+    .input-group input[type="date"] { flex: 1; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.88rem; outline: none; color: #333; transition: border-color 0.2s; }
     .input-group input[type="date"]:focus { border-color: #6c63ff; }
-    .input-group button {
-      padding: 10px 18px; background: #6c63ff; color: #fff;
-      border: none; border-radius: 10px; font-size: 0.9rem;
-      cursor: pointer; white-space: nowrap; transition: background 0.2s;
-    }
+    .input-group button { padding: 10px 18px; background: #6c63ff; color: #fff; border: none; border-radius: 10px; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
     .input-group button:hover { background: #574fd6; }
-
     .filters { display: flex; gap: 6px; margin-bottom: 14px; }
-    .filters button {
-      flex: 1; padding: 7px; border: 2px solid #e0e0e0;
-      background: #fff; border-radius: 8px; font-size: 0.8rem;
-      cursor: pointer; color: #666; transition: all 0.2s;
-    }
+    .filters button { flex: 1; padding: 7px; border: 2px solid #e0e0e0; background: #fff; border-radius: 8px; font-size: 0.8rem; cursor: pointer; color: #666; transition: all 0.2s; }
     .filters button.active { border-color: #6c63ff; color: #6c63ff; font-weight: 700; }
-
     #todo-list { list-style: none; }
-
-    .todo-item {
-      border-radius: 12px; margin-bottom: 8px; background: #fafafa;
-      border: 1px solid #efefef; overflow: hidden; transition: box-shadow 0.15s;
-    }
+    .todo-item { border-radius: 12px; margin-bottom: 8px; background: #fafafa; border: 1px solid #efefef; overflow: hidden; transition: box-shadow 0.15s; }
     .todo-item:hover { box-shadow: 0 2px 8px rgba(108,99,255,0.1); }
     .todo-item.done .todo-text { text-decoration: line-through; color: #aaa; }
     .todo-item.done .todo-date { color: #ccc; }
-
-    .todo-main {
-      display: flex; align-items: center; gap: 10px; padding: 12px 10px; cursor: default;
-    }
-    .todo-main input[type="checkbox"] {
-      width: 17px; height: 17px; accent-color: #6c63ff; cursor: pointer; flex-shrink: 0;
-    }
+    .todo-main { display: flex; align-items: center; gap: 10px; padding: 12px 10px; cursor: default; }
+    .todo-main input[type="checkbox"] { width: 17px; height: 17px; accent-color: #6c63ff; cursor: pointer; flex-shrink: 0; }
     .todo-info { flex: 1; min-width: 0; }
     .todo-text { font-size: 0.9rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .todo-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
     .todo-date { font-size: 0.75rem; color: #999; }
-
-    .pri-badge {
-      font-size: 0.68rem; font-weight: 700; padding: 1px 6px;
-      border-radius: 20px; letter-spacing: 0.02em;
-    }
-    .pri-high   { background: #ffe4e4; color: #e74c3c; }
+    .pri-badge { font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 20px; letter-spacing: 0.02em; }
+    .pri-high { background: #ffe4e4; color: #e74c3c; }
     .pri-normal { background: #e8f4fd; color: #3498db; }
-    .pri-low    { background: #f0f0f0; color: #999; }
-
+    .pri-low { background: #f0f0f0; color: #999; }
     .note-dot { font-size: 0.72rem; color: #6c63ff; display: none; }
     .note-dot.visible { display: inline; }
     .todo-memo-preview { font-size: 0.75rem; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .todo-item.done .todo-memo-preview { color: #bbb; }
-
-    .time-tag {
-      font-size: 0.72rem; color: #888; background: #f5f5f5;
-      padding: 1px 6px; border-radius: 8px;
-    }
-
-    .expand-btn {
-      background: none; border: none; color: #ccc; font-size: 0.8rem;
-      cursor: pointer; padding: 3px 7px; border-radius: 6px;
-      transition: color 0.2s, transform 0.2s; flex-shrink: 0;
-    }
+    .time-tag { font-size: 0.72rem; color: #888; background: #f5f5f5; padding: 1px 6px; border-radius: 8px; }
+    .expand-btn { background: none; border: none; color: #ccc; font-size: 0.8rem; cursor: pointer; padding: 3px 7px; border-radius: 6px; transition: color 0.2s, transform 0.2s; flex-shrink: 0; }
     .expand-btn:hover { color: #6c63ff; }
     .expand-btn.open { transform: rotate(180deg); color: #6c63ff; }
-
-    .delete-btn {
-      background: none; border: none; color: #ccc; font-size: 1rem;
-      cursor: pointer; padding: 2px 6px; border-radius: 6px;
-      transition: color 0.2s; flex-shrink: 0;
-    }
+    .delete-btn { background: none; border: none; color: #ccc; font-size: 1rem; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: color 0.2s; flex-shrink: 0; }
     .delete-btn:hover { color: #e74c3c; }
-
-    .todo-detail {
-      max-height: 0; overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      background: #f8f7ff; border-top: 1px solid transparent;
-    }
-    .todo-detail.open {
-      max-height: 320px;
-      border-top-color: #ede9ff;
-      padding: 14px 14px 16px;
-    }
-
-    .detail-row {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
-    }
+    .todo-detail { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; background: #f8f7ff; border-top: 1px solid transparent; }
+    .todo-detail.open { max-height: 320px; border-top-color: #ede9ff; padding: 14px 14px 16px; }
+    .detail-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .detail-label { font-size: 0.75rem; font-weight: 600; color: #888; min-width: 48px; }
-
-    .pri-btn {
-      padding: 4px 12px; border-radius: 20px; border: 2px solid #e0e0e0;
-      font-size: 0.75rem; font-weight: 600; cursor: pointer;
-      background: #fff; color: #aaa; transition: all 0.15s;
-    }
+    .pri-btn { padding: 4px 12px; border-radius: 20px; border: 2px solid #e0e0e0; font-size: 0.75rem; font-weight: 600; cursor: pointer; background: #fff; color: #aaa; transition: all 0.15s; }
     .pri-btn:hover { border-color: #aaa; }
-    .pri-btn.sel-high   { border-color: #e74c3c; background: #ffe4e4; color: #e74c3c; }
+    .pri-btn.sel-high { border-color: #e74c3c; background: #ffe4e4; color: #e74c3c; }
     .pri-btn.sel-normal { border-color: #3498db; background: #e8f4fd; color: #3498db; }
-    .pri-btn.sel-low    { border-color: #bbb; background: #f0f0f0; color: #777; }
-
-    .time-input {
-      padding: 5px 10px; border: 2px solid #e0e0e0; border-radius: 8px;
-      font-size: 0.82rem; outline: none; color: #333; transition: border-color 0.2s;
-    }
+    .pri-btn.sel-low { border-color: #bbb; background: #f0f0f0; color: #777; }
+    .time-input { padding: 5px 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.82rem; outline: none; color: #333; transition: border-color 0.2s; }
     .time-input:focus { border-color: #6c63ff; }
-
-    .memo-textarea {
-      width: 100%; min-height: 80px; padding: 10px 12px;
-      border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.85rem;
-      outline: none; resize: vertical; font-family: inherit; color: #333;
-      transition: border-color 0.2s; background: #fff; line-height: 1.5;
-    }
+    .memo-textarea { width: 100%; min-height: 80px; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.85rem; outline: none; resize: vertical; font-family: inherit; color: #333; transition: border-color 0.2s; background: #fff; line-height: 1.5; }
     .memo-textarea:focus { border-color: #6c63ff; }
     .memo-textarea::placeholder { color: #ccc; }
-
     .summary { margin-top: 14px; text-align: center; font-size: 0.8rem; color: #aaa; }
     .empty-msg { text-align: center; color: #ccc; padding: 24px 0; font-size: 0.9rem; }
-
-    .banner {
-      background: #fff8e6; border: 1px solid #ffd97a; border-radius: 10px;
-      padding: 10px 16px; font-size: 0.82rem; color: #7a5c00;
-      max-width: 900px; margin: 0 auto 16px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
-    .banner button {
-      padding: 6px 14px; background: #ffb800; color: #fff;
-      border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
-    }
+    .banner { background: #fff8e6; border: 1px solid #ffd97a; border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; color: #7a5c00; max-width: 900px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .banner button { padding: 6px 14px; background: #ffb800; color: #fff; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
     .banner.hidden { display: none; }
-
-    .loading-msg {
-      text-align: center; color: #6c63ff; padding: 24px 0;
-      font-size: 0.9rem; animation: pulse 1.2s infinite;
-    }
+    .loading-msg { text-align: center; color: #6c63ff; padding: 24px 0; font-size: 0.9rem; animation: pulse 1.2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45); z-index: 1000;
-      align-items: flex-end; justify-content: center;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-
-    .modal {
-      background: #fff; border-radius: 20px 20px 0 0; padding: 0;
-      max-width: 480px; width: 100%;
-      box-shadow: 0 -4px 40px rgba(0,0,0,0.18); animation: slideUp 0.25s ease;
-      max-height: 88vh; display: flex; flex-direction: column; position: relative;
-    }
+    .modal { background: #fff; border-radius: 20px 20px 0 0; padding: 0; max-width: 480px; width: 100%; box-shadow: 0 -4px 40px rgba(0,0,0,0.18); animation: slideUp 0.25s ease; max-height: 88vh; display: flex; flex-direction: column; position: relative; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
     .modal-top { padding: 20px 24px 0; position: relative; flex-shrink: 0; }
-    .modal-scroll {
-      overflow-y: auto; -webkit-overflow-scrolling: touch;
-      padding: 0 24px; flex: 1;
-    }
-    .modal-bottom {
-      padding: 12px 24px 32px; flex-shrink: 0;
-      background: #fff; border-top: 1px solid #f0f0f0;
-    }
-
+    .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 24px; flex: 1; }
+    .modal-bottom { padding: 12px 24px 32px; flex-shrink: 0; background: #fff; border-top: 1px solid #f0f0f0; }
     .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .modal-header h2 { font-size: 1.15rem; color: #1a1a2e; }
-    .modal-close {
-      background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem;
-      cursor: pointer; color: #555; width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
+    .modal-close { background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: #555; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .modal-close:active { background: #e74c3c; color: #fff; }
-
     .modal-date { font-size: 0.8rem; color: #aaa; margin-bottom: 16px; }
-
-    .tts-bar {
-      display: flex; align-items: center; gap: 8px;
-      background: #f4f3ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px;
-    }
+    .tts-bar { display: flex; align-items: center; gap: 8px; background: #f4f3ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; }
     .tts-bar .tts-status { flex: 1; font-size: 0.82rem; color: #6c63ff; }
-    .tts-bar button {
-      padding: 6px 14px; border: none; border-radius: 8px;
-      font-size: 0.8rem; cursor: pointer; transition: background 0.2s;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
-    .tts-play  { background: #6c63ff; color: #fff; }
-    .tts-stop  { background: #e0e0e0; color: #555; }
-
+    .tts-bar button { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .tts-play { background: #6c63ff; color: #fff; }
+    .tts-stop { background: #e0e0e0; color: #555; }
     .modal-stats { display: flex; gap: 8px; margin-bottom: 18px; }
-    .stat-box {
-      flex: 1; background: #f4f3ff; border-radius: 10px; padding: 12px 8px; text-align: center;
-    }
+    .stat-box { flex: 1; background: #f4f3ff; border-radius: 10px; padding: 12px 8px; text-align: center; }
     .stat-box .num { font-size: 1.4rem; font-weight: 700; color: #6c63ff; }
     .stat-box .label { font-size: 0.72rem; color: #888; margin-top: 2px; }
     .stat-box.danger .num { color: #e74c3c; } .stat-box.danger { background: #fff4f4; }
-
     .modal-section { margin-bottom: 16px; }
     .modal-section h3 { font-size: 0.8rem; font-weight: 700; color: #888; margin-bottom: 8px; letter-spacing: 0.04em; }
-
-    .briefing-item {
-      padding: 10px 12px; background: #fafafa; border-radius: 10px;
-      margin-bottom: 6px; font-size: 0.88rem; color: #333; border-left: 3px solid #6c63ff;
-    }
+    .briefing-item { padding: 10px 12px; background: #fafafa; border-radius: 10px; margin-bottom: 6px; font-size: 0.88rem; color: #333; border-left: 3px solid #6c63ff; }
     .briefing-item.overdue { border-left-color: #e74c3c; }
     .b-date { font-size: 0.75rem; color: #999; margin-top: 2px; }
     .briefing-empty { font-size: 0.88rem; color: #bbb; text-align: center; padding: 12px 0; }
-
-    .modal-bottom button {
-      width: 100%; padding: 16px; background: #6c63ff; color: #fff;
-      border: none; border-radius: 12px; font-size: 1rem;
-      cursor: pointer; font-weight: 700;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
+    .modal-bottom button { width: 100%; padding: 16px; background: #6c63ff; color: #fff; border: none; border-radius: 12px; font-size: 1rem; cursor: pointer; font-weight: 700; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .modal-bottom button:active { background: #574fd6; }
-
     @media (max-width: 660px) { .layout { flex-direction: column; } }
   </style>
 </head>
@@ -367,7 +180,6 @@
     <span>🔔 오전 7시 자동 알림을 받으려면 알림을 허용해주세요.</span>
     <button onclick="requestNotifPermission()">알림 허용</button>
   </div>
-
   <div class="banner hidden" id="install-banner">
     <span>📲 홈 화면에 추가하면 앱처럼 사용할 수 있어요!</span>
     <button onclick="installPWA()">홈 화면 추가</button>
@@ -388,7 +200,6 @@
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-
     <div class="todo-card">
       <h2 id="todo-panel-title">📋 전체 할 일</h2>
       <div class="input-group">
@@ -408,7 +219,6 @@
     </div>
   </div>
 
-  <!-- 브리핑 모달 -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal" id="modal">
       <div class="modal-top">
@@ -418,27 +228,22 @@
         </div>
         <p class="modal-date" id="modal-date"></p>
       </div>
-
       <div class="modal-scroll">
         <div class="tts-bar">
           <span class="tts-status" id="tts-status">🔊 ▶ 재생 버튼을 눌러 브리핑 시작</span>
           <button class="tts-play" id="tts-play-btn">▶ 재생</button>
           <button class="tts-stop" id="tts-stop-btn">■ 중지</button>
         </div>
-
         <div class="modal-stats" id="modal-stats"></div>
-
         <div class="modal-section">
           <h3>📌 오늘 할 일</h3>
           <div id="modal-today-list"></div>
         </div>
-
         <div class="modal-section" id="modal-overdue-section">
           <h3>⚠️ 미완료 지난 일정</h3>
           <div id="modal-overdue-list"></div>
         </div>
       </div>
-
       <div class="modal-bottom">
         <button id="modal-confirm-btn">확인, 시작하기!</button>
       </div>
@@ -469,11 +274,7 @@
     }
 
     function mapFromDB(t) {
-      return {
-        id: t.id, text: t.title || '', date: t.date || '',
-        done: t.completed || false, detail: t.description || '',
-        priority: t.priority || 'normal', time: t.time || ''
-      };
+      return { id:t.id, text:t.title||'', date:t.date||'', done:t.completed||false, detail:t.description||'', priority:t.priority||'normal', time:t.time||'' };
     }
 
     async function loadTodos() {
@@ -498,9 +299,7 @@
       const text = input.value.trim();
       if (!text) { input.focus(); return; }
       const date = dateInput.value || selectedDate || todayStr();
-      const { data, error } = await sb.from('todos').insert({
-        title: text, date, completed: false, description: '', priority: 'normal', time: ''
-      }).select().single();
+      const { data, error } = await sb.from('todos').insert({ title:text, date, completed:false, description:'', priority:'normal', time:'' }).select().single();
       if (error) { alert('추가 실패. 다시 시도해주세요.'); return; }
       input.value = '';
       todos.push(mapFromDB(data));
@@ -516,9 +315,7 @@
       if (error) return;
       t.done = newDone;
       filter = 'all';
-      document.querySelectorAll('.filters button').forEach((b, i) => {
-        if (i === 0) b.classList.add('active'); else b.classList.remove('active');
-      });
+      document.querySelectorAll('.filters button').forEach((b, i) => { if (i===0) b.classList.add('active'); else b.classList.remove('active'); });
       expandedId = id; renderCalendar(); renderTodos();
     }
 
@@ -530,47 +327,37 @@
       renderCalendar(); renderTodos();
     }
 
-    function toggleExpand(id) {
-      expandedId = (expandedId === id) ? null : id;
-      renderTodos();
-    }
+    function toggleExpand(id) { expandedId = (expandedId === id) ? null : id; renderTodos(); }
 
     async function updateField(id, field, value) {
       const t = todos.find(t => t.id === id);
       if (!t) return;
       t[field] = value;
-      if (field === 'text') { const el = document.querySelector(`[data-id="${id}"] .todo-text`); if (el) el.textContent = value; }
-      if (field === 'detail') { const dot = document.querySelector(`[data-id="${id}"] .note-dot`); if (dot) dot.classList.toggle('visible', value.trim().length > 0); }
-      if (field === 'priority') {
-        const badge = document.querySelector(`[data-id="${id}"] .pri-badge`);
-        if (badge) { badge.className = `pri-badge pri-${value}`; badge.textContent = { high:'높음', normal:'보통', low:'낮음' }[value]; }
-        ['high','normal','low'].forEach(p => { const btn = document.querySelector(`[data-id="${id}"] .pri-btn-${p}`); if (btn) btn.className = `pri-btn pri-btn-${p}${value===p?' sel-'+p:''}`; });
+      if (field==='text') { const el=document.querySelector(`[data-id="${id}"] .todo-text`); if(el) el.textContent=value; }
+      if (field==='detail') { const dot=document.querySelector(`[data-id="${id}"] .note-dot`); if(dot) dot.classList.toggle('visible',value.trim().length>0); }
+      if (field==='priority') {
+        const badge=document.querySelector(`[data-id="${id}"] .pri-badge`);
+        if(badge){badge.className=`pri-badge pri-${value}`;badge.textContent={high:'높음',normal:'보통',low:'낮음'}[value];}
+        ['high','normal','low'].forEach(p=>{const btn=document.querySelector(`[data-id="${id}"] .pri-btn-${p}`);if(btn)btn.className=`pri-btn pri-btn-${p}${value===p?' sel-'+p:''}`;});
       }
-      if (field === 'time') { const tag = document.querySelector(`[data-id="${id}"] .time-tag`); if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; } }
-      const fieldMap = { text:'title', done:'completed', detail:'description', priority:'priority', time:'time' };
-      const dbField = fieldMap[field];
-      if (!dbField) return;
-      _pendingUpdates[id+'|'+field] = { dbField, value };
+      if (field==='time') { const tag=document.querySelector(`[data-id="${id}"] .time-tag`); if(tag){tag.textContent=value?`⏰ ${value}`:'';tag.style.display=value?'':'none';} }
+      const fieldMap={text:'title',done:'completed',detail:'description',priority:'priority',time:'time'};
+      const dbField=fieldMap[field]; if(!dbField) return;
+      _pendingUpdates[id+'|'+field]={dbField,value};
       clearTimeout(_debounceTimers[id+field]);
-      _debounceTimers[id+field] = setTimeout(async () => {
-        delete _pendingUpdates[id+'|'+field];
-        await sb.from('todos').update({ [dbField]: value }).eq('id', id);
-      }, 500);
+      _debounceTimers[id+field]=setTimeout(async()=>{delete _pendingUpdates[id+'|'+field];await sb.from('todos').update({[dbField]:value}).eq('id',id);},500);
     }
 
     async function flushPending(id) {
-      const t = todos.find(t => t.id === id);
-      if (!t) return;
+      const t = todos.find(t => t.id === id); if (!t) return;
       const item = document.querySelector(`[data-id="${id}"]`);
       if (item) {
-        const ta = item.querySelector('.memo-textarea'); if (ta) t.detail = ta.value;
-        const ti = item.querySelector('input[type="time"]'); if (ti) t.time = ti.value;
-        const tx = item.querySelector('.todo-detail input[type="text"]'); if (tx) t.text = tx.value;
+        const ta=item.querySelector('.memo-textarea'); if(ta) t.detail=ta.value;
+        const ti=item.querySelector('input[type="time"]'); if(ti) t.time=ti.value;
+        const tx=item.querySelector('.todo-detail input[type="text"]'); if(tx) t.text=tx.value;
       }
-      ['text','detail','priority','time'].forEach(f => {
-        clearTimeout(_debounceTimers[id+f]); delete _debounceTimers[id+f]; delete _pendingUpdates[id+'|'+f];
-      });
-      await sb.from('todos').update({ title:t.text, description:t.detail, time:t.time, priority:t.priority }).eq('id', id);
+      ['text','detail','priority','time'].forEach(f=>{clearTimeout(_debounceTimers[id+f]);delete _debounceTimers[id+f];delete _pendingUpdates[id+'|'+f];});
+      await sb.from('todos').update({title:t.text,description:t.detail,time:t.time,priority:t.priority}).eq('id',id);
     }
 
     function setFilter(f, btn) {
@@ -588,18 +375,18 @@
     function renderTodos() {
       const list = document.getElementById('todo-list');
       const title = document.getElementById('todo-panel-title');
-      let base = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
-      base = base.filter(t => filter==='all' ? true : filter==='done' ? t.done : !t.done);
+      let base = selectedDate ? todos.filter(t => t.date===selectedDate) : todos;
+      base = base.filter(t => filter==='all'?true:filter==='done'?t.done:!t.done);
       base.sort((a,b) => a.date.localeCompare(b.date));
-      if (selectedDate) { const [,m,d] = selectedDate.split('-'); title.textContent = `📋 ${parseInt(m)}월 ${parseInt(d)}일`; }
-      else title.textContent = '📋 전체 할 일';
-      if (base.length === 0) { list.innerHTML = `<li class="empty-msg">할 일이 없습니다 🎉</li>`; }
+      if (selectedDate) { const [,m,d]=selectedDate.split('-'); title.textContent=`📋 ${parseInt(m)}월 ${parseInt(d)}일`; }
+      else title.textContent='📋 전체 할 일';
+      if (base.length===0) { list.innerHTML=`<li class="empty-msg">할 일이 없습니다 🎉</li>`; }
       else {
         list.innerHTML = base.map(t => {
-          const pri = t.priority || 'normal';
-          const priLabel = { high:'높음', normal:'보통', low:'낮음' }[pri];
-          const isOpen = expandedId === t.id;
-          const hasNote = (t.detail||'').trim().length > 0;
+          const pri=t.priority||'normal';
+          const priLabel={high:'높음',normal:'보통',low:'낮음'}[pri];
+          const isOpen=expandedId===t.id;
+          const hasNote=(t.detail||'').trim().length>0;
           return `<li class="todo-item ${t.done?'done':''}" data-id="${t.id}">
             <div class="todo-main">
               <input type="checkbox" ${t.done?'checked':''} onchange="toggle('${t.id}')" />
@@ -617,20 +404,13 @@
               <button class="delete-btn" onclick="remove('${t.id}')">✕</button>
             </div>
             <div class="todo-detail ${isOpen?'open':''}">
-              <div class="detail-row">
-                <span class="detail-label">제목</span>
-                <input class="time-input" style="flex:1" type="text" value="${esc(t.text)}" oninput="updateField('${t.id}','text',this.value)" />
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">우선순위</span>
+              <div class="detail-row"><span class="detail-label">제목</span><input class="time-input" style="flex:1" type="text" value="${esc(t.text)}" oninput="updateField('${t.id}','text',this.value)" /></div>
+              <div class="detail-row"><span class="detail-label">우선순위</span>
                 <button class="pri-btn pri-btn-high${pri==='high'?' sel-high':''}" onclick="updateField('${t.id}','priority','high')">높음</button>
                 <button class="pri-btn pri-btn-normal${pri==='normal'?' sel-normal':''}" onclick="updateField('${t.id}','priority','normal')">보통</button>
                 <button class="pri-btn pri-btn-low${pri==='low'?' sel-low':''}" onclick="updateField('${t.id}','priority','low')">낮음</button>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">시간</span>
-                <input class="time-input" type="time" value="${esc(t.time||'')}" oninput="updateField('${t.id}','time',this.value)" />
-              </div>
+              <div class="detail-row"><span class="detail-label">시간</span><input class="time-input" type="time" value="${esc(t.time||'')}" oninput="updateField('${t.id}','time',this.value)" /></div>
               <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
                 <span class="detail-label">메모</span>
                 <textarea class="memo-textarea" placeholder="일정에 대한 상세 내용을 입력하세요..." oninput="updateField('${t.id}','detail',this.value)">${esc(t.detail||'')}</textarea>
@@ -639,91 +419,69 @@
           </li>`;
         }).join('');
       }
-      const src = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
-      const done = src.filter(t => t.done).length;
-      document.getElementById('summary').textContent = `전체 ${src.length}개 · 완료 ${done}개 · 미완료 ${src.length-done}개`;
+      const src=selectedDate?todos.filter(t=>t.date===selectedDate):todos;
+      const done=src.filter(t=>t.done).length;
+      document.getElementById('summary').textContent=`전체 ${src.length}개 · 완료 ${done}개 · 미완료 ${src.length-done}개`;
     }
 
     function fmtLabel(dateStr) {
       if (!dateStr) return '';
-      const [y,m,d] = dateStr.split('-').map(Number);
-      return `${m}월 ${d}일 (${['일','월','화','수','목','금','토'][new Date(y,m-1,d).getDay()]})`;
+      const [y,m,d]=dateStr.split('-').map(Number);
+      return `${m}월 ${d}일 (${'일월화수목금토'[new Date(y,m-1,d).getDay()]}요일)`;
     }
 
     function renderCalendar() {
-      document.getElementById('cal-title').textContent = `${viewYear}년 ${viewMonth+1}월`;
-      const grid = document.getElementById('cal-grid');
-      const dows = ['일','월','화','수','목','금','토'];
-      let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-      const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
-      for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
-      const dotMap = {};
-      todos.forEach(t => {
-        if (!dotMap[t.date]) dotMap[t.date] = { total:0, done:0 };
-        dotMap[t.date].total++;
-        if (t.done) dotMap[t.date].done++;
-      });
-      for (let d = 1; d <= daysInMonth; d++) {
-        const m = String(viewMonth+1).padStart(2,'0');
-        const dd = String(d).padStart(2,'0');
-        const dateStr = `${viewYear}-${m}-${dd}`;
-        const dow = (firstDay+d-1)%7;
-        const info = dotMap[dateStr];
-        let dotHtml = '';
-        if (info) {
-          const u = info.total-info.done;
-          for (let i=0;i<Math.min(u,3);i++) dotHtml+=`<div class="dot"></div>`;
-          for (let i=0;i<Math.min(info.done,3-Math.min(u,3));i++) dotHtml+=`<div class="dot done"></div>`;
-        }
-        const cls = ['cal-day', dateStr===todayStr()?'today':'', dateStr===selectedDate?'selected':'', dow===0?'sunday':'', dow===6?'saturday':''].filter(Boolean).join(' ');
-        html += `<div class="${cls}" onclick="selectDate('${dateStr}')"><div class="day-num">${d}</div><div class="dot-row">${dotHtml}</div></div>`;
+      document.getElementById('cal-title').textContent=`${viewYear}년 ${viewMonth+1}월`;
+      const grid=document.getElementById('cal-grid');
+      const dows=['일','월','화','수','목','금','토'];
+      let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+      const firstDay=new Date(viewYear,viewMonth,1).getDay();
+      const daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
+      for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
+      const dotMap={};
+      todos.forEach(t=>{if(!dotMap[t.date])dotMap[t.date]={total:0,done:0};dotMap[t.date].total++;if(t.done)dotMap[t.date].done++;});
+      for(let d=1;d<=daysInMonth;d++){
+        const m=String(viewMonth+1).padStart(2,'0');
+        const dd=String(d).padStart(2,'0');
+        const dateStr=`${viewYear}-${m}-${dd}`;
+        const dow=(firstDay+d-1)%7;
+        const info=dotMap[dateStr];
+        let dotHtml='';
+        if(info){const u=info.total-info.done;for(let i=0;i<Math.min(u,3);i++)dotHtml+=`<div class="dot"></div>`;for(let i=0;i<Math.min(info.done,3-Math.min(u,3));i++)dotHtml+=`<div class="dot done"></div>`;}
+        const cls=['cal-day',dateStr===todayStr()?'today':'',dateStr===selectedDate?'selected':'',dow===0?'sunday':'',dow===6?'saturday':''].filter(Boolean).join(' ');
+        html+=`<div class="${cls}" onclick="selectDate('${dateStr}')"><div class="day-num">${d}</div><div class="dot-row">${dotHtml}</div></div>`;
       }
-      grid.innerHTML = html;
+      grid.innerHTML=html;
     }
 
     function changeMonth(dir) {
-      viewMonth += dir;
-      if (viewMonth>11){viewMonth=0;viewYear++;} if (viewMonth<0){viewMonth=11;viewYear--;}
+      viewMonth+=dir;
+      if(viewMonth>11){viewMonth=0;viewYear++;} if(viewMonth<0){viewMonth=11;viewYear--;}
       renderCalendar();
     }
 
-    // ══════════════════════════════════════
-    // 브리핑 모달
-    // ══════════════════════════════════════
     function showBriefing(autoRead = false) {
-      const ts = todayStr();
-      const [y,m,d] = ts.split('-').map(Number);
-      document.getElementById('modal-date').textContent =
-        `${y}년 ${m}월 ${d}일 (${'일월화수목금토'[new Date(y,m-1,d).getDay()]}요일)`;
-      const todayTodos = todos.filter(t => t.date===ts && !t.done);
-      const overdue    = todos.filter(t => t.date<ts  && !t.done);
-      const totalDone  = todos.filter(t => t.done).length;
-      _briefingTodayTodos = todayTodos; _briefingOverdue = overdue;
-      document.getElementById('modal-stats').innerHTML = `
+      const ts=todayStr();
+      const [y,m,d]=ts.split('-').map(Number);
+      document.getElementById('modal-date').textContent=`${y}년 ${m}월 ${d}일 (${'일월화수목금토'[new Date(y,m-1,d).getDay()]}요일)`;
+      const todayTodos=todos.filter(t=>t.date===ts&&!t.done);
+      const overdue=todos.filter(t=>t.date<ts&&!t.done);
+      const totalDone=todos.filter(t=>t.done).length;
+      _briefingTodayTodos=todayTodos; _briefingOverdue=overdue;
+      document.getElementById('modal-stats').innerHTML=`
         <div class="stat-box"><div class="num">${todayTodos.length}</div><div class="label">오늘 할 일</div></div>
         <div class="stat-box ${overdue.length>0?'danger':''}"><div class="num">${overdue.length}</div><div class="label">미완료 지난 일</div></div>
         <div class="stat-box"><div class="num">${totalDone}</div><div class="label">완료됨</div></div>`;
-      document.getElementById('modal-today-list').innerHTML = todayTodos.length===0
-        ? `<div class="briefing-empty">오늘 예정된 할 일이 없어요 😊</div>`
-        : todayTodos.map(t => {
-            const pri = t.priority||'normal';
-            const priLabel = {high:'🔴 높음',normal:'🔵 보통',low:'⚪ 낮음'}[pri];
-            return `<div class="briefing-item">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                <span>📌 ${esc(t.text)}</span>
-                <span style="font-size:0.72rem;color:#888;">${priLabel}${t.time?' · ⏰ '+esc(t.time):''}</span>
-              </div>
-              ${t.detail?`<div style="margin-top:5px;font-size:0.8rem;color:#777;white-space:pre-wrap;">${esc(t.detail)}</div>`:''}
-            </div>`;
+      document.getElementById('modal-today-list').innerHTML=todayTodos.length===0
+        ?`<div class="briefing-empty">오늘 예정된 할 일이 없어요 😊</div>`
+        :todayTodos.map(t=>{
+            const pri=t.priority||'normal';
+            const priLabel={high:'🔴 높음',normal:'🔵 보통',low:'⚪ 낮음'}[pri];
+            return `<div class="briefing-item"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><span>📌 ${esc(t.text)}</span><span style="font-size:0.72rem;color:#888;">${priLabel}${t.time?' · ⏰ '+esc(t.time):''}</span></div>${t.detail?`<div style="margin-top:5px;font-size:0.8rem;color:#777;white-space:pre-wrap;">${esc(t.detail)}</div>`:''}</div>`;
           }).join('');
-      const overdueSection = document.getElementById('modal-overdue-section');
-      if (overdue.length===0) { overdueSection.style.display='none'; }
-      else {
-        overdueSection.style.display='';
-        document.getElementById('modal-overdue-list').innerHTML =
-          overdue.map(t => `<div class="briefing-item overdue">⚠️ ${esc(t.text)}<div class="b-date">${fmtLabel(t.date)}</div></div>`).join('');
-      }
+      const overdueSection=document.getElementById('modal-overdue-section');
+      if(overdue.length===0){overdueSection.style.display='none';}
+      else{overdueSection.style.display='';document.getElementById('modal-overdue-list').innerHTML=overdue.map(t=>`<div class="briefing-item overdue">⚠️ ${esc(t.text)}<div class="b-date">${fmtLabel(t.date)}</div></div>`).join('');}
       document.getElementById('modal-overlay').classList.add('show');
       prefetchTTS();
     }
@@ -734,29 +492,25 @@
     }
 
     function addTap(id, fn) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('touchend', function(e){ e.preventDefault(); fn(); }, { passive:false });
-      el.addEventListener('click', fn);
+      const el=document.getElementById(id); if(!el) return;
+      el.addEventListener('touchend',function(e){e.preventDefault();fn();},{passive:false});
+      el.addEventListener('click',fn);
     }
 
-    // ══════════════════════════════════════
-    // TTS
-    // ══════════════════════════════════════
     function buildBriefingText() {
-      const h = new Date().getHours();
-      const greeting = h<11 ? '좋은 아침이에요' : '안녕하세요';
-      let text = `${greeting}. `;
-      if (_briefingTodayTodos.length===0 && _briefingOverdue.length===0) {
-        text += '오늘은 예정된 할 일이 없어요. 좋은 하루 보내세요!';
+      const h=new Date().getHours();
+      const greeting=h<11?'좋은 아침이에요':'안녕하세요';
+      let text=`${greeting}. `;
+      if(_briefingTodayTodos.length===0&&_briefingOverdue.length===0){
+        text+='오늘은 예정된 할 일이 없어요. 좋은 하루 보내세요!';
       } else {
-        if (_briefingTodayTodos.length>0) {
-          text += `오늘 할 일이 ${_briefingTodayTodos.length}개 있습니다. `;
-          _briefingTodayTodos.forEach((t,i) => { text += `${i+1}번, ${t.text}. `; if (t.detail) text += `메모: ${t.detail}. `; });
+        if(_briefingTodayTodos.length>0){
+          text+=`오늘 할 일이 ${_briefingTodayTodos.length}개 있습니다. `;
+          _briefingTodayTodos.forEach((t,i)=>{text+=`${i+1}번, ${t.text}. `;if(t.detail)text+=`메모: ${t.detail}. `;});
         }
-        if (_briefingOverdue.length>0) {
-          text += `주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. `;
-          _briefingOverdue.forEach((t,i) => { text += `${i+1}번, ${t.text}. `; if (t.detail) text += `메모: ${t.detail}. `; });
+        if(_briefingOverdue.length>0){
+          text+=`주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. `;
+          _briefingOverdue.forEach((t,i)=>{text+=`${i+1}번, ${t.text}. `;if(t.detail)text+=`메모: ${t.detail}. `;});
         }
       }
       return text;
@@ -774,21 +528,7 @@
       if (!text) return;
       _prefetchedBlob = null;
 
-      // 방법①: speechSynthesis 프라이밍 성공 시 즉시 한국어 TTS 재생
-      if (window._synthPrimed && 'speechSynthesis' in window) {
-        statusEl.textContent = '🔊 음성 재생 중...';
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.lang = 'ko-KR'; utt.rate = 0.9;
-        utt.onstart = () => { statusEl.textContent = '🔊 음성 재생 중...'; };
-        utt.onend   = () => { statusEl.textContent = '✅ 재생 완료'; window._synthPrimed = false; };
-        utt.onerror = () => { window._synthPrimed = false; };
-        window.speechSynthesis.speak(utt);
-        _fetchElevenLabsInBackground(text);
-        return;
-      }
-
-      // 방법②③: ElevenLabs 음성 생성 후 자동재생 시도
+      // ElevenLabs 먼저 시도 (고품질)
       statusEl.textContent = '⏳ 음성 생성 중...';
       try {
         const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`, {
@@ -799,7 +539,7 @@
         if (!res.ok) throw new Error('API 오류 '+res.status);
         const blob = await res.blob();
 
-        // 방법②: 사전재생된 무음 오디오 → src 교체 + unmute
+        // 방법①: 사전재생된 무음 오디오 → src 교체 + unmute (ElevenLabs 품질)
         if (window._primedAudio && window._mutedAudioPlayed) {
           try {
             const a = window._primedAudio;
@@ -812,17 +552,43 @@
             statusEl.textContent = '🔊 음성 재생 중...';
             currentSource = a; window._primedAudio = null;
             return;
+          } catch(e) { console.warn('방법① 실패:', e); }
+        }
+
+        // 방법②: AudioContext로 재생 시도
+        if (window._primedCtx) audioCtx = window._primedCtx;
+        if (audioCtx) {
+          try {
+            if (audioCtx.state==='suspended') await audioCtx.resume();
+            if (audioCtx.state==='running') {
+              const audioBuffer = await audioCtx.decodeAudioData(await blob.arrayBuffer());
+              if (currentSource) { try { currentSource.stop(); } catch(e) {} }
+              const source = audioCtx.createBufferSource();
+              source.buffer = audioBuffer; source.connect(audioCtx.destination);
+              source.onended = () => { statusEl.textContent = '✅ 재생 완료'; currentSource = null; };
+              source.start(0); currentSource = source;
+              statusEl.textContent = '🔊 음성 재생 중...';
+              return;
+            }
           } catch(e) { console.warn('방법② 실패:', e); }
         }
 
-        // 방법③: 사전생성된 AudioContext로 재생
+        // ElevenLabs 재생 실패 → blob은 재생 버튼용으로 보관
         _prefetchedBlob = blob;
-        if (window._primedCtx) audioCtx = window._primedCtx;
-        await playBlob(blob, statusEl);
 
-      } catch(e) {
-        console.error(e);
-        _prefetchedBlob = null;
+      } catch(e) { console.error('ElevenLabs 실패:', e); }
+
+      // 방법③: speechSynthesis 폴백 (ElevenLabs 재생 불가 시)
+      if (window._synthPrimed && 'speechSynthesis' in window) {
+        statusEl.textContent = '🔊 음성 재생 중... (시스템 음성)';
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = 'ko-KR'; utt.rate = 0.9;
+        utt.onstart = () => { statusEl.textContent = '🔊 음성 재생 중... (시스템 음성)'; };
+        utt.onend   = () => { statusEl.textContent = '✅ 재생 완료 (▶ 버튼으로 ElevenLabs 재생 가능)'; window._synthPrimed = false; };
+        utt.onerror = () => { statusEl.textContent = '▶ 재생 버튼을 눌러 브리핑을 들어보세요'; window._synthPrimed = false; };
+        window.speechSynthesis.speak(utt);
+      } else {
         statusEl.textContent = '▶ 재생 버튼을 눌러 브리핑을 들어보세요';
       }
     }
@@ -932,10 +698,7 @@
     function installPWA() {
       if (!deferredInstallPrompt) return;
       deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.then(() => {
-        deferredInstallPrompt = null;
-        document.getElementById('install-banner').classList.add('hidden');
-      });
+      deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt=null; document.getElementById('install-banner').classList.add('hidden'); });
     }
     window.addEventListener('appinstalled', () => { document.getElementById('install-banner').classList.add('hidden'); });
 
@@ -946,14 +709,10 @@
       });
     }
 
-    function esc(str) {
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     document.getElementById('todo-input').addEventListener('keydown', e => { if (e.key==='Enter') addTodo(); });
-    document.getElementById('todo-date').addEventListener('change', e => {
-      selectedDate = e.target.value || null; renderCalendar(); renderTodos();
-    });
+    document.getElementById('todo-date').addEventListener('change', e => { selectedDate=e.target.value||null; renderCalendar(); renderTodos(); });
     document.getElementById('todo-date').value = todayStr();
 
     addTap('modal-close-btn', closeBriefing);
@@ -964,9 +723,7 @@
     document.getElementById('modal-overlay').addEventListener('touchend', function(e) {
       if (e.target===this) { e.preventDefault(); closeBriefing(); }
     }, { passive:false });
-    document.getElementById('modal-overlay').addEventListener('click', function(e) {
-      if (e.target===this) closeBriefing();
-    });
+    document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target===this) closeBriefing(); });
 
     init();
   </script>
