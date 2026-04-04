@@ -48,6 +48,13 @@
     .sync-btn:hover { background: #218838; }
     .sync-btn.syncing { opacity: 0.7; cursor: not-allowed; }
 
+    .test-notif-btn {
+      padding: 8px 16px; background: #6c63ff; color: #fff;
+      border: none; border-radius: 10px; font-size: 0.85rem;
+      cursor: pointer; font-weight: 600; transition: background 0.2s;
+    }
+    .test-notif-btn:hover { background: #574fd6; }
+
     .layout {
       display: flex; gap: 24px; max-width: 900px;
       margin: 0 auto; align-items: flex-start; flex-wrap: wrap;
@@ -338,6 +345,7 @@
     <h1>📅 투두 캘린더</h1>
     <button class="briefing-btn" onclick="showBriefing(true)">☀️ 오늘 브리핑</button>
     <button class="sync-btn" id="sync-btn" onclick="syncTodos()">🔄 새로고침</button>
+    <button class="test-notif-btn" onclick="sendTestNotification()">🔔 테스트 알림</button>
   </div>
 
   <div class="layout">
@@ -545,7 +553,7 @@
         if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; }
       }
 
-      const fieldMap = { text: 'title', done: 'completed', detail: 'description', priority: 'priority', time: 'time' };
+      const fieldMap = { text: 'title', done: 'completed', detail: 'description', priority: 'priority', time: 'time', date: 'date' };
       const dbField = fieldMap[field];
       if (!dbField) return;
 
@@ -638,6 +646,11 @@
                 <span class="detail-label">제목</span>
                 <input class="time-input" style="flex:1" type="text" value="${esc(t.text)}"
                   oninput="updateField('${t.id}','text',this.value)" />
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">날짜</span>
+                <input class="time-input" type="date" value="${esc(t.date||'')}"
+                  onchange="updateField('${t.id}','date',this.value);renderCalendar();renderTodos();" />
               </div>
               <div class="detail-row">
                 <span class="detail-label">우선순위</span>
@@ -871,12 +884,82 @@
       if (el) el.textContent = '⏹ 중지됨';
     }
 
+    // ══════════════════════════════════════
+    // 테스트 알림
+    // ══════════════════════════════════════
+    async function sendTestNotification() {
+      if (typeof Notification === 'undefined') {
+        alert('이 브라우저는 알림을 지원하지 않아요.');
+        return;
+      }
+      if (Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          alert('알림 권한이 필요합니다.\n주소창 좌측 🔒 → 알림 → 허용 으로 변경해주세요.');
+          return;
+        }
+      }
+      if (Notification.permission === 'denied') {
+        alert('알림이 차단되어 있어요.\n주소창 좌측 🔒 → 알림 → 허용 으로 변경해주세요.');
+        return;
+      }
+
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        const todayCount   = todos.filter(t => t.date === todayStr() && !t.done).length;
+        const overdueCount = todos.filter(t => t.date < todayStr()  && !t.done).length;
+        const body = todayCount === 0 && overdueCount === 0
+          ? '오늘 예정된 일정이 없어요 😊'
+          : `오늘 할 일 ${todayCount}개${overdueCount > 0 ? ` · 미완료 지난 일 ${overdueCount}개` : ''}`;
+
+        await reg.showNotification('☀️ 오늘의 일정 브리핑 (테스트)', {
+          body,
+          icon: './icon.svg',
+          badge: './icon.svg',
+          data: { url: './todo.html?briefing=1' },
+          tag: 'daily-briefing-test',
+          requireInteraction: true
+        });
+      } else {
+        const n = new Notification('☀️ 오늘의 일정 브리핑 (테스트)', {
+          body: '알림을 클릭하면 브리핑이 열립니다!',
+          icon: './icon.svg'
+        });
+        n.onclick = () => { window.focus(); showBriefing(true); n.close(); };
+      }
+    }
+
+    function sendDailyNotification() {
+      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        showBriefing(true);
+        return;
+      }
+      if (!('serviceWorker' in navigator)) { showBriefing(true); return; }
+
+      navigator.serviceWorker.ready.then(reg => {
+        const todayCount  = todos.filter(t => t.date === todayStr() && !t.done).length;
+        const overdueCount = todos.filter(t => t.date < todayStr()  && !t.done).length;
+        const body = todayCount === 0 && overdueCount === 0
+          ? '오늘 예정된 일정이 없어요 😊'
+          : `오늘 할 일 ${todayCount}개${overdueCount > 0 ? ` · 미완료 지난 일 ${overdueCount}개` : ''}`;
+
+        reg.showNotification('☀️ 오늘의 일정 브리핑', {
+          body,
+          icon: './icon.svg',
+          badge: './icon.svg',
+          data: { url: './todo.html?briefing=1' },
+          tag: 'daily-briefing',
+          requireInteraction: true
+        });
+      }).catch(() => showBriefing(true));
+    }
+
     function checkBriefingTime() {
       const now = new Date();
       const todayKey = 'briefing_' + todayStr();
       if (now.getHours() === 7 && now.getMinutes() === 0 && !localStorage.getItem(todayKey)) {
         localStorage.setItem(todayKey, '1');
-        showBriefing(true);
+        sendDailyNotification();   // ← OS 알림 발송 (클릭 시 앱 열림 + 자동 재생)
       }
     }
     setInterval(checkBriefingTime, 30000);
@@ -932,6 +1015,13 @@
       navigator.serviceWorker.register('sw.js').then(() => {
         if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
           document.getElementById('notif-banner').classList.remove('hidden');
+        }
+      });
+
+      // SW로부터 SHOW_BRIEFING 메시지 수신 → 자동 음성 브리핑 시작
+      navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data && e.data.type === 'SHOW_BRIEFING') {
+          showBriefing(true);
         }
       });
     }
