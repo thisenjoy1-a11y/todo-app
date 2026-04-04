@@ -460,6 +460,7 @@
         if (audioCtx) {
           try {
             if (audioCtx.state === 'suspended') await audioCtx.resume();
+            if (audioCtx.state !== 'running') throw new Error('AudioContext not running');
             const arrayBuffer = await blob.arrayBuffer();
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
             if (currentSource) { try { currentSource.stop(); } catch(e) {} }
