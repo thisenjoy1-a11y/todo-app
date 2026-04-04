@@ -871,40 +871,12 @@
       if (el) el.textContent = '⏹ 중지됨';
     }
 
-    // ══════════════════════════════════════
-    // OS 알림 발송 (오전 7시)
-    // ══════════════════════════════════════
-    function sendDailyNotification() {
-      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
-        showBriefing(true);
-        return;
-      }
-      if (!('serviceWorker' in navigator)) { showBriefing(true); return; }
-
-      navigator.serviceWorker.ready.then(reg => {
-        const todayCount   = todos.filter(t => t.date === todayStr() && !t.done).length;
-        const overdueCount = todos.filter(t => t.date < todayStr()  && !t.done).length;
-        const body = todayCount === 0 && overdueCount === 0
-          ? '오늘 예정된 일정이 없어요 😊'
-          : `오늘 할 일 ${todayCount}개${overdueCount > 0 ? ` · 미완료 지난 일 ${overdueCount}개` : ''}`;
-
-        reg.showNotification('☀️ 오늘의 일정 브리핑', {
-          body,
-          icon: './icon.svg',
-          badge: './icon.svg',
-          data: { url: './todo.html?briefing=1' },
-          tag: 'daily-briefing',
-          requireInteraction: true
-        });
-      }).catch(() => showBriefing(true));
-    }
-
     function checkBriefingTime() {
       const now = new Date();
       const todayKey = 'briefing_' + todayStr();
       if (now.getHours() === 7 && now.getMinutes() === 0 && !localStorage.getItem(todayKey)) {
         localStorage.setItem(todayKey, '1');
-        sendDailyNotification();   // ← OS 알림 발송 (클릭 시 앱 열림 + 자동 재생)
+        showBriefing(true);
       }
     }
     setInterval(checkBriefingTime, 30000);
@@ -960,13 +932,6 @@
       navigator.serviceWorker.register('sw.js').then(() => {
         if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
           document.getElementById('notif-banner').classList.remove('hidden');
-        }
-      });
-
-      // SW로부터 SHOW_BRIEFING 메시지 수신 → 자동 음성 브리핑 시작
-      navigator.serviceWorker.addEventListener('message', e => {
-        if (e.data && e.data.type === 'SHOW_BRIEFING') {
-          showBriefing(true);
         }
       });
     }
