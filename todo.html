@@ -725,6 +725,11 @@
           <div class="dot-row">${dotHtml}</div>
         </div>`;
       }
+      const totalCells = firstDay + daysInMonth;
+      const remainder = totalCells % 7;
+      if (remainder > 0) {
+        for (let i = 0; i < 7 - remainder; i++) html += `<div class="cal-day empty"></div>`;
+      }
       grid.innerHTML = html;
     }
 
