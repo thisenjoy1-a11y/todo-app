@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>투두 캘린더</title>
+
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#6c63ff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,26 +18,73 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 32px 16px; }
-    .top-bar { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .top-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
+    }
+
     h1 { font-size: 1.6rem; color: #1a1a2e; }
-    .briefing-btn { padding: 8px 16px; background: #ff8c42; color: #fff; border: none; border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+
+    .briefing-btn {
+      padding: 8px 16px; background: #ff8c42; color: #fff;
+      border: none; border-radius: 10px; font-size: 0.85rem;
+      cursor: pointer; font-weight: 600; transition: background 0.2s;
+    }
     .briefing-btn:hover { background: #e07030; }
-    .sync-btn { padding: 8px 16px; background: #28a745; color: #fff; border: none; border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+
+    .sync-btn {
+      padding: 8px 16px; background: #28a745; color: #fff;
+      border: none; border-radius: 10px; font-size: 0.85rem;
+      cursor: pointer; font-weight: 600; transition: background 0.2s;
+    }
     .sync-btn:hover { background: #218838; }
     .sync-btn.syncing { opacity: 0.7; cursor: not-allowed; }
-    .layout { display: flex; gap: 24px; max-width: 900px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
-    .calendar-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 320px; }
-    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+    .layout {
+      display: flex; gap: 24px; max-width: 900px;
+      margin: 0 auto; align-items: flex-start; flex-wrap: wrap;
+    }
+
+    /* ── 캘린더 ── */
+    .calendar-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 320px;
+    }
+
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
     .cal-header span { font-size: 1rem; font-weight: 700; color: #1a1a2e; }
-    .cal-header button { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6c63ff; padding: 4px 10px; border-radius: 8px; transition: background 0.2s; }
+    .cal-header button {
+      background: none; border: none; font-size: 1.2rem;
+      cursor: pointer; color: #6c63ff; padding: 4px 10px;
+      border-radius: 8px; transition: background 0.2s;
+    }
     .cal-header button:hover { background: #f0eeff; }
+
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .cal-dow { text-align: center; font-size: 0.72rem; font-weight: 600; color: #aaa; padding: 4px 0; }
-    .cal-day { position: relative; text-align: center; padding: 8px 2px 4px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; color: #333; transition: background 0.15s; min-height: 48px; }
+
+    .cal-day {
+      position: relative; text-align: center; padding: 8px 2px 4px;
+      border-radius: 10px; cursor: pointer; font-size: 0.85rem;
+      color: #333; transition: background 0.15s; min-height: 48px;
+    }
     .cal-day:hover { background: #f0eeff; }
     .cal-day.empty { cursor: default; } .cal-day.empty:hover { background: none; }
-    .cal-day.today .day-num { background: #6c63ff; color: #fff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+    .cal-day.today .day-num {
+      background: #6c63ff; color: #fff; border-radius: 50%;
+      width: 26px; height: 26px; display: flex;
+      align-items: center; justify-content: center; margin: 0 auto;
+    }
     .cal-day.selected { background: #ede9ff; }
     .cal-day.sunday .day-num { color: #e74c3c; }
     .cal-day.saturday .day-num { color: #3498db; }
@@ -41,104 +92,251 @@
     .dot-row { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
     .dot { width: 5px; height: 5px; border-radius: 50%; background: #6c63ff; }
     .dot.done { background: #aaa; }
-    .todo-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 300px; }
+
+    /* ── 투두 패널 ── */
+    .todo-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; flex: 1 1 300px;
+    }
     .todo-card h2 { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; }
+
     .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .input-group input[type="text"] { padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+    .input-group input[type="text"] {
+      padding: 11px 14px; border: 2px solid #e0e0e0;
+      border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+    }
     .input-group input[type="text"]:focus { border-color: #6c63ff; }
     .input-row2 { display: flex; gap: 8px; }
-    .input-group input[type="date"] { flex: 1; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.88rem; outline: none; color: #333; transition: border-color 0.2s; }
+    .input-group input[type="date"] {
+      flex: 1; padding: 10px 12px; border: 2px solid #e0e0e0;
+      border-radius: 10px; font-size: 0.88rem; outline: none;
+      color: #333; transition: border-color 0.2s;
+    }
     .input-group input[type="date"]:focus { border-color: #6c63ff; }
-    .input-group button { padding: 10px 18px; background: #6c63ff; color: #fff; border: none; border-radius: 10px; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+    .input-group button {
+      padding: 10px 18px; background: #6c63ff; color: #fff;
+      border: none; border-radius: 10px; font-size: 0.9rem;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
     .input-group button:hover { background: #574fd6; }
+
     .filters { display: flex; gap: 6px; margin-bottom: 14px; }
-    .filters button { flex: 1; padding: 7px; border: 2px solid #e0e0e0; background: #fff; border-radius: 8px; font-size: 0.8rem; cursor: pointer; color: #666; transition: all 0.2s; }
+    .filters button {
+      flex: 1; padding: 7px; border: 2px solid #e0e0e0;
+      background: #fff; border-radius: 8px; font-size: 0.8rem;
+      cursor: pointer; color: #666; transition: all 0.2s;
+    }
     .filters button.active { border-color: #6c63ff; color: #6c63ff; font-weight: 700; }
+
     #todo-list { list-style: none; }
-    .todo-item { border-radius: 12px; margin-bottom: 8px; background: #fafafa; border: 1px solid #efefef; overflow: hidden; transition: box-shadow 0.15s; }
+
+    .todo-item {
+      border-radius: 12px; margin-bottom: 8px; background: #fafafa;
+      border: 1px solid #efefef; overflow: hidden; transition: box-shadow 0.15s;
+    }
     .todo-item:hover { box-shadow: 0 2px 8px rgba(108,99,255,0.1); }
     .todo-item.done .todo-text { text-decoration: line-through; color: #aaa; }
     .todo-item.done .todo-date { color: #ccc; }
-    .todo-main { display: flex; align-items: center; gap: 10px; padding: 12px 10px; cursor: default; }
-    .todo-main input[type="checkbox"] { width: 17px; height: 17px; accent-color: #6c63ff; cursor: pointer; flex-shrink: 0; }
+
+    .todo-main {
+      display: flex; align-items: center; gap: 10px; padding: 12px 10px; cursor: default;
+    }
+    .todo-main input[type="checkbox"] {
+      width: 17px; height: 17px; accent-color: #6c63ff; cursor: pointer; flex-shrink: 0;
+    }
     .todo-info { flex: 1; min-width: 0; }
     .todo-text { font-size: 0.9rem; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .todo-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
     .todo-date { font-size: 0.75rem; color: #999; }
-    .pri-badge { font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 20px; letter-spacing: 0.02em; }
-    .pri-high { background: #ffe4e4; color: #e74c3c; }
+
+    .pri-badge {
+      font-size: 0.68rem; font-weight: 700; padding: 1px 6px;
+      border-radius: 20px; letter-spacing: 0.02em;
+    }
+    .pri-high   { background: #ffe4e4; color: #e74c3c; }
     .pri-normal { background: #e8f4fd; color: #3498db; }
-    .pri-low { background: #f0f0f0; color: #999; }
+    .pri-low    { background: #f0f0f0; color: #999; }
+
     .note-dot { font-size: 0.72rem; color: #6c63ff; display: none; }
     .note-dot.visible { display: inline; }
     .todo-memo-preview { font-size: 0.75rem; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .todo-item.done .todo-memo-preview { color: #bbb; }
-    .time-tag { font-size: 0.72rem; color: #888; background: #f5f5f5; padding: 1px 6px; border-radius: 8px; }
-    .expand-btn { background: none; border: none; color: #ccc; font-size: 0.8rem; cursor: pointer; padding: 3px 7px; border-radius: 6px; transition: color 0.2s, transform 0.2s; flex-shrink: 0; }
+
+    .time-tag {
+      font-size: 0.72rem; color: #888; background: #f5f5f5;
+      padding: 1px 6px; border-radius: 8px;
+    }
+
+    .expand-btn {
+      background: none; border: none; color: #ccc; font-size: 0.8rem;
+      cursor: pointer; padding: 3px 7px; border-radius: 6px;
+      transition: color 0.2s, transform 0.2s; flex-shrink: 0;
+    }
     .expand-btn:hover { color: #6c63ff; }
     .expand-btn.open { transform: rotate(180deg); color: #6c63ff; }
-    .delete-btn { background: none; border: none; color: #ccc; font-size: 1rem; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: color 0.2s; flex-shrink: 0; }
+
+    .delete-btn {
+      background: none; border: none; color: #ccc; font-size: 1rem;
+      cursor: pointer; padding: 2px 6px; border-radius: 6px;
+      transition: color 0.2s; flex-shrink: 0;
+    }
     .delete-btn:hover { color: #e74c3c; }
-    .todo-detail { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; background: #f8f7ff; border-top: 1px solid transparent; }
-    .todo-detail.open { max-height: 320px; border-top-color: #ede9ff; padding: 14px 14px 16px; }
-    .detail-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+
+    .todo-detail {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      background: #f8f7ff; border-top: 1px solid transparent;
+    }
+    .todo-detail.open {
+      max-height: 320px;
+      border-top-color: #ede9ff;
+      padding: 14px 14px 16px;
+    }
+
+    .detail-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+    }
     .detail-label { font-size: 0.75rem; font-weight: 600; color: #888; min-width: 48px; }
-    .pri-btn { padding: 4px 12px; border-radius: 20px; border: 2px solid #e0e0e0; font-size: 0.75rem; font-weight: 600; cursor: pointer; background: #fff; color: #aaa; transition: all 0.15s; }
+
+    .pri-btn {
+      padding: 4px 12px; border-radius: 20px; border: 2px solid #e0e0e0;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      background: #fff; color: #aaa; transition: all 0.15s;
+    }
     .pri-btn:hover { border-color: #aaa; }
-    .pri-btn.sel-high { border-color: #e74c3c; background: #ffe4e4; color: #e74c3c; }
+    .pri-btn.sel-high   { border-color: #e74c3c; background: #ffe4e4; color: #e74c3c; }
     .pri-btn.sel-normal { border-color: #3498db; background: #e8f4fd; color: #3498db; }
-    .pri-btn.sel-low { border-color: #bbb; background: #f0f0f0; color: #777; }
-    .time-input { padding: 5px 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.82rem; outline: none; color: #333; transition: border-color 0.2s; }
+    .pri-btn.sel-low    { border-color: #bbb; background: #f0f0f0; color: #777; }
+
+    .time-input {
+      padding: 5px 10px; border: 2px solid #e0e0e0; border-radius: 8px;
+      font-size: 0.82rem; outline: none; color: #333; transition: border-color 0.2s;
+    }
     .time-input:focus { border-color: #6c63ff; }
-    .memo-textarea { width: 100%; min-height: 80px; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.85rem; outline: none; resize: vertical; font-family: inherit; color: #333; transition: border-color 0.2s; background: #fff; line-height: 1.5; }
+
+    .memo-textarea {
+      width: 100%; min-height: 80px; padding: 10px 12px;
+      border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.85rem;
+      outline: none; resize: vertical; font-family: inherit; color: #333;
+      transition: border-color 0.2s; background: #fff; line-height: 1.5;
+    }
     .memo-textarea:focus { border-color: #6c63ff; }
     .memo-textarea::placeholder { color: #ccc; }
+
     .summary { margin-top: 14px; text-align: center; font-size: 0.8rem; color: #aaa; }
     .empty-msg { text-align: center; color: #ccc; padding: 24px 0; font-size: 0.9rem; }
-    .banner { background: #fff8e6; border: 1px solid #ffd97a; border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; color: #7a5c00; max-width: 900px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .banner button { padding: 6px 14px; background: #ffb800; color: #fff; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+
+    .banner {
+      background: #fff8e6; border: 1px solid #ffd97a; border-radius: 10px;
+      padding: 10px 16px; font-size: 0.82rem; color: #7a5c00;
+      max-width: 900px; margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .banner button {
+      padding: 6px 14px; background: #ffb800; color: #fff;
+      border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+    }
     .banner.hidden { display: none; }
-    .loading-msg { text-align: center; color: #6c63ff; padding: 24px 0; font-size: 0.9rem; animation: pulse 1.2s infinite; }
+
+    /* 로딩 */
+    .loading-msg {
+      text-align: center; color: #6c63ff; padding: 24px 0;
+      font-size: 0.9rem; animation: pulse 1.2s infinite;
+    }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: flex-end; justify-content: center; }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 1000;
+      align-items: flex-end; justify-content: center;
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 20px 20px 0 0; padding: 0; max-width: 480px; width: 100%; box-shadow: 0 -4px 40px rgba(0,0,0,0.18); animation: slideUp 0.25s ease; max-height: 88vh; display: flex; flex-direction: column; position: relative; }
+
+    .modal {
+      background: #fff; border-radius: 20px 20px 0 0; padding: 0;
+      max-width: 480px; width: 100%;
+      box-shadow: 0 -4px 40px rgba(0,0,0,0.18); animation: slideUp 0.25s ease;
+      max-height: 88vh; display: flex; flex-direction: column; position: relative;
+    }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-top { padding: 20px 24px 0; position: relative; flex-shrink: 0; }
-    .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 24px; flex: 1; }
-    .modal-bottom { padding: 12px 24px 32px; flex-shrink: 0; background: #fff; border-top: 1px solid #f0f0f0; }
+
+    .modal-top {
+      padding: 20px 24px 0; position: relative; flex-shrink: 0;
+    }
+    .modal-scroll {
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 0 24px; flex: 1;
+    }
+    .modal-bottom {
+      padding: 12px 24px 32px; flex-shrink: 0;
+      background: #fff; border-top: 1px solid #f0f0f0;
+    }
+
     .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .modal-header h2 { font-size: 1.15rem; color: #1a1a2e; }
-    .modal-close { background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: #555; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .modal-close {
+      background: #f0f0f0; border: none; border-radius: 50%; font-size: 1.3rem;
+      cursor: pointer; color: #555; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
     .modal-close:active { background: #e74c3c; color: #fff; }
+
     .modal-date { font-size: 0.8rem; color: #aaa; margin-bottom: 16px; }
-    .tts-bar { display: flex; align-items: center; gap: 8px; background: #f4f3ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; }
+
+    .tts-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: #f4f3ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px;
+    }
     .tts-bar .tts-status { flex: 1; font-size: 0.82rem; color: #6c63ff; }
-    .tts-bar button { padding: 6px 14px; border: none; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    .tts-play { background: #6c63ff; color: #fff; }
-    .tts-stop { background: #e0e0e0; color: #555; }
+    .tts-bar button {
+      padding: 6px 14px; border: none; border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer; transition: background 0.2s;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .tts-play  { background: #6c63ff; color: #fff; }
+    .tts-stop  { background: #e0e0e0; color: #555; }
+
     .modal-stats { display: flex; gap: 8px; margin-bottom: 18px; }
-    .stat-box { flex: 1; background: #f4f3ff; border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .stat-box {
+      flex: 1; background: #f4f3ff; border-radius: 10px; padding: 12px 8px; text-align: center;
+    }
     .stat-box .num { font-size: 1.4rem; font-weight: 700; color: #6c63ff; }
     .stat-box .label { font-size: 0.72rem; color: #888; margin-top: 2px; }
     .stat-box.danger .num { color: #e74c3c; } .stat-box.danger { background: #fff4f4; }
+
     .modal-section { margin-bottom: 16px; }
     .modal-section h3 { font-size: 0.8rem; font-weight: 700; color: #888; margin-bottom: 8px; letter-spacing: 0.04em; }
-    .briefing-item { padding: 10px 12px; background: #fafafa; border-radius: 10px; margin-bottom: 6px; font-size: 0.88rem; color: #333; border-left: 3px solid #6c63ff; }
+
+    .briefing-item {
+      padding: 10px 12px; background: #fafafa; border-radius: 10px;
+      margin-bottom: 6px; font-size: 0.88rem; color: #333; border-left: 3px solid #6c63ff;
+    }
     .briefing-item.overdue { border-left-color: #e74c3c; }
     .b-date { font-size: 0.75rem; color: #999; margin-top: 2px; }
     .briefing-empty { font-size: 0.88rem; color: #bbb; text-align: center; padding: 12px 0; }
-    .modal-bottom button { width: 100%; padding: 16px; background: #6c63ff; color: #fff; border: none; border-radius: 12px; font-size: 1rem; cursor: pointer; font-weight: 700; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+    .modal-bottom button {
+      width: 100%; padding: 16px; background: #6c63ff; color: #fff;
+      border: none; border-radius: 12px; font-size: 1rem;
+      cursor: pointer; font-weight: 700;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
     .modal-bottom button:active { background: #574fd6; }
+
     @media (max-width: 660px) { .layout { flex-direction: column; } }
   </style>
 </head>
 <body>
 
+  <!-- 알림 허용 배너 -->
   <div class="banner hidden" id="notif-banner">
     <span>🔔 오전 7시 자동 알림을 받으려면 알림을 허용해주세요.</span>
     <button onclick="requestNotifPermission()">알림 허용</button>
   </div>
+
+  <!-- PWA 설치 배너 -->
   <div class="banner hidden" id="install-banner">
     <span>📲 홈 화면에 추가하면 앱처럼 사용할 수 있어요!</span>
     <button onclick="installPWA()">홈 화면 추가</button>
@@ -146,7 +344,7 @@
 
   <div class="top-bar">
     <h1>📅 투두 캘린더</h1>
-    <button class="briefing-btn" onclick="showBriefing()">☀️ 오늘 브리핑</button>
+    <button class="briefing-btn" onclick="showBriefing(true)">☀️ 오늘 브리핑</button>
     <button class="sync-btn" id="sync-btn" onclick="syncTodos()">🔄 새로고침</button>
   </div>
 
@@ -159,6 +357,7 @@
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+
     <div class="todo-card">
       <h2 id="todo-panel-title">📋 전체 할 일</h2>
       <div class="input-group">
@@ -178,6 +377,7 @@
     </div>
   </div>
 
+  <!-- 브리핑 모달 -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal" id="modal">
       <div class="modal-top">
@@ -187,22 +387,27 @@
         </div>
         <p class="modal-date" id="modal-date"></p>
       </div>
+
       <div class="modal-scroll">
         <div class="tts-bar">
-          <span class="tts-status" id="tts-status">⏳ 음성 준비 중...</span>
+          <span class="tts-status" id="tts-status">🔊 ▶ 재생 버튼을 눌러 브리핑 시작</span>
           <button class="tts-play" id="tts-play-btn">▶ 재생</button>
           <button class="tts-stop" id="tts-stop-btn">■ 중지</button>
         </div>
+
         <div class="modal-stats" id="modal-stats"></div>
+
         <div class="modal-section">
           <h3>📌 오늘 할 일</h3>
           <div id="modal-today-list"></div>
         </div>
+
         <div class="modal-section" id="modal-overdue-section">
           <h3>⚠️ 미완료 지난 일정</h3>
           <div id="modal-overdue-list"></div>
         </div>
       </div>
+
       <div class="modal-bottom">
         <button id="modal-confirm-btn">확인, 시작하기!</button>
       </div>
@@ -210,47 +415,97 @@
   </div>
 
   <script>
+    // ══════════════════════════════════════
+    // Supabase 초기화
+    // ══════════════════════════════════════
     const SUPABASE_URL = 'https://dyskcxfcmpuscpmlrfho.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_BPaXqHIp7GS2ZJp3tFIKsg_MyXaGisU';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let todos = [], filter = 'all', selectedDate = null, expandedId = null;
-    let _debounceTimers = {}, _pendingUpdates = {};
-    let _briefingTodayTodos = [], _briefingOverdue = [];
+    // ══════════════════════════════════════
+    // 상태
+    // ══════════════════════════════════════
+    let todos = [];
+    let filter = 'all';
+    let selectedDate = null;
+    let expandedId = null;
+    let _debounceTimers = {};
+    let _pendingUpdates = {};
+    let _briefingTodayTodos = [];
+    let _briefingOverdue = [];
+
     const today = new Date();
-    let viewYear = today.getFullYear(), viewMonth = today.getMonth();
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
 
     function todayStr() { return fmt(today); }
-    function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-    function mapFromDB(t) { return { id:t.id, text:t.title||'', date:t.date||'', done:t.completed||false, detail:t.description||'', priority:t.priority||'normal', time:t.time||'' }; }
+    function fmt(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
+    function mapFromDB(t) {
+      return {
+        id: t.id,
+        text: t.title || '',
+        date: t.date || '',
+        done: t.completed || false,
+        detail: t.description || '',
+        priority: t.priority || 'normal',
+        time: t.time || ''
+      };
+    }
+
+    // ══════════════════════════════════════
+    // DB 로드
+    // ══════════════════════════════════════
     async function loadTodos() {
       const list = document.getElementById('todo-list');
       list.innerHTML = '<li class="loading-msg">⏳ 불러오는 중...</li>';
+
       const { data, error } = await sb.from('todos').select('*').order('created_at', { ascending: true });
-      if (error) { list.innerHTML = '<li class="empty-msg">❌ 로드 실패. 새로고침 해주세요.</li>'; return; }
+      if (error) {
+        console.error('로드 오류:', error);
+        list.innerHTML = '<li class="empty-msg">❌ 로드 실패. 새로고침 해주세요.</li>';
+        return;
+      }
       todos = data.map(mapFromDB);
-      renderCalendar(); renderTodos();
+      renderCalendar();
+      renderTodos();
     }
 
     async function syncTodos() {
       const btn = document.getElementById('sync-btn');
-      btn.textContent = '⏳ 동기화 중...'; btn.classList.add('syncing');
+      btn.textContent = '⏳ 동기화 중...';
+      btn.classList.add('syncing');
       await loadTodos();
-      btn.textContent = '🔄 새로고침'; btn.classList.remove('syncing');
+      btn.textContent = '🔄 새로고침';
+      btn.classList.remove('syncing');
     }
 
+    // ══════════════════════════════════════
+    // 투두 CRUD
+    // ══════════════════════════════════════
     async function addTodo() {
       const input = document.getElementById('todo-input');
       const dateInput = document.getElementById('todo-date');
       const text = input.value.trim();
       if (!text) { input.focus(); return; }
       const date = dateInput.value || selectedDate || todayStr();
-      const { data, error } = await sb.from('todos').insert({ title:text, date:date, completed:false, description:'', priority:'normal', time:'' }).select().single();
-      if (error) { alert('추가 실패. 다시 시도해주세요.'); return; }
+
+      const { data, error } = await sb.from('todos').insert({
+        title: text,
+        date: date,
+        completed: false,
+        description: '',
+        priority: 'normal',
+        time: ''
+      }).select().single();
+
+      if (error) { console.error('추가 오류:', error); alert('추가 실패. 다시 시도해주세요.'); return; }
       input.value = '';
       todos.push(mapFromDB(data));
-      renderCalendar(); renderTodos();
+      renderCalendar();
+      renderTodos();
     }
 
     async function toggle(id) {
@@ -259,164 +514,325 @@
       if (!t) return;
       const newDone = !t.done;
       const { error } = await sb.from('todos').update({ completed: newDone }).eq('id', id);
-      if (error) return;
+      if (error) { console.error('토글 오류:', error); return; }
       t.done = newDone;
+
+      // 항상 "전체" 필터로 전환
       filter = 'all';
-      document.querySelectorAll('.filters button').forEach((b, i) => { if (i===0) b.classList.add('active'); else b.classList.remove('active'); });
+      const filterBtns = document.querySelectorAll('.filters button');
+      filterBtns.forEach((b, i) => {
+        if (i === 0) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+
       expandedId = id;
-      renderCalendar(); renderTodos();
+      renderCalendar();
+      renderTodos();
     }
 
     async function remove(id) {
       const { error } = await sb.from('todos').delete().eq('id', id);
-      if (error) return;
+      if (error) { console.error('삭제 오류:', error); return; }
       todos = todos.filter(t => t.id !== id);
       if (expandedId === id) expandedId = null;
-      renderCalendar(); renderTodos();
+      renderCalendar();
+      renderTodos();
     }
 
-    function toggleExpand(id) { expandedId = (expandedId === id) ? null : id; renderTodos(); }
+    function toggleExpand(id) {
+      expandedId = (expandedId === id) ? null : id;
+      renderTodos();
+    }
 
     async function updateField(id, field, value) {
       const t = todos.find(t => t.id === id);
       if (!t) return;
       t[field] = value;
-      if (field === 'text') { const el = document.querySelector(`[data-id="${id}"] .todo-text`); if (el) el.textContent = value; }
-      if (field === 'detail') { const el = document.querySelector(`[data-id="${id}"] .note-dot`); if (el) el.classList.toggle('visible', value.trim().length > 0); }
+
+      // UI 즉시 업데이트
+      if (field === 'text') {
+        const textEl = document.querySelector(`[data-id="${id}"] .todo-text`);
+        if (textEl) textEl.textContent = value;
+      }
+      if (field === 'detail') {
+        const dot = document.querySelector(`[data-id="${id}"] .note-dot`);
+        if (dot) dot.classList.toggle('visible', value.trim().length > 0);
+      }
       if (field === 'priority') {
         const badge = document.querySelector(`[data-id="${id}"] .pri-badge`);
-        if (badge) { badge.className = `pri-badge pri-${value}`; badge.textContent = {high:'높음',normal:'보통',low:'낮음'}[value]; }
-        ['high','normal','low'].forEach(p => { const btn = document.querySelector(`[data-id="${id}"] .pri-btn-${p}`); if (btn) btn.className = `pri-btn pri-btn-${p}${value===p?' sel-'+p:''}`; });
+        if (badge) {
+          const labels = { high: '높음', normal: '보통', low: '낮음' };
+          badge.className = `pri-badge pri-${value}`;
+          badge.textContent = labels[value];
+        }
+        ['high','normal','low'].forEach(p => {
+          const btn = document.querySelector(`[data-id="${id}"] .pri-btn-${p}`);
+          if (btn) btn.className = `pri-btn pri-btn-${p}${value === p ? ' sel-'+p : ''}`;
+        });
       }
-      if (field === 'time') { const tag = document.querySelector(`[data-id="${id}"] .time-tag`); if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; } }
-      const fieldMap = { text:'title', done:'completed', detail:'description', priority:'priority', time:'time' };
+      if (field === 'time') {
+        const tag = document.querySelector(`[data-id="${id}"] .time-tag`);
+        if (tag) { tag.textContent = value ? `⏰ ${value}` : ''; tag.style.display = value ? '' : 'none'; }
+      }
+
+      // DB 업데이트 (디바운스 500ms)
+      const fieldMap = { text: 'title', done: 'completed', detail: 'description', priority: 'priority', time: 'time' };
       const dbField = fieldMap[field];
       if (!dbField) return;
-      _pendingUpdates[id+'|'+field] = { dbField, value };
-      clearTimeout(_debounceTimers[id+field]);
-      _debounceTimers[id+field] = setTimeout(async () => {
-        delete _pendingUpdates[id+'|'+field];
-        await sb.from('todos').update({ [dbField]: value }).eq('id', id);
+
+      _pendingUpdates[id + '|' + field] = { dbField, value };
+      clearTimeout(_debounceTimers[id + field]);
+      _debounceTimers[id + field] = setTimeout(async () => {
+        delete _pendingUpdates[id + '|' + field];
+        const { error } = await sb.from('todos').update({ [dbField]: value }).eq('id', id);
+        if (error) console.error('업데이트 오류:', error);
       }, 500);
     }
 
     async function flushPending(id) {
       const t = todos.find(t => t.id === id);
       if (!t) return;
+
+      // DOM에서 직접 현재 값 읽기
       const item = document.querySelector(`[data-id="${id}"]`);
       if (item) {
-        const ta = item.querySelector('.memo-textarea'); if (ta) t.detail = ta.value;
-        const ti = item.querySelector('input[type="time"]'); if (ti) t.time = ti.value;
-        const tx = item.querySelector('.todo-detail input[type="text"]'); if (tx) t.text = tx.value;
+        const textarea = item.querySelector('.memo-textarea');
+        if (textarea) t.detail = textarea.value;
+        const timeInput = item.querySelector('input[type="time"]');
+        if (timeInput) t.time = timeInput.value;
+        const titleInput = item.querySelector('.todo-detail input[type="text"]');
+        if (titleInput) t.text = titleInput.value;
       }
-      ['text','detail','priority','time'].forEach(f => { clearTimeout(_debounceTimers[id+f]); delete _debounceTimers[id+f]; delete _pendingUpdates[id+'|'+f]; });
-      await sb.from('todos').update({ title:t.text, description:t.detail, time:t.time, priority:t.priority }).eq('id', id);
+
+      // 디바운스 타이머 모두 클리어
+      ['text', 'detail', 'priority', 'time'].forEach(field => {
+        clearTimeout(_debounceTimers[id + field]);
+        delete _debounceTimers[id + field];
+        delete _pendingUpdates[id + '|' + field];
+      });
+
+      // Supabase에 저장
+      const { error } = await sb.from('todos').update({
+        title: t.text,
+        description: t.detail,
+        time: t.time,
+        priority: t.priority
+      }).eq('id', id);
+      if (error) console.error('저장 오류:', error);
     }
 
-    function setFilter(f, btn) { filter = f; document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderTodos(); }
-    function selectDate(dateStr) { selectedDate = (selectedDate === dateStr) ? null : dateStr; document.getElementById('todo-date').value = selectedDate || ''; renderCalendar(); renderTodos(); }
+    function setFilter(f, btn) {
+      filter = f;
+      document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTodos();
+    }
 
+    function selectDate(dateStr) {
+      selectedDate = (selectedDate === dateStr) ? null : dateStr;
+      document.getElementById('todo-date').value = selectedDate || '';
+      renderCalendar(); renderTodos();
+    }
+
+    // ══════════════════════════════════════
+    // 투두 렌더
+    // ══════════════════════════════════════
     function renderTodos() {
       const list = document.getElementById('todo-list');
       const title = document.getElementById('todo-panel-title');
+
       let base = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
       base = base.filter(t => filter === 'all' ? true : filter === 'done' ? t.done : !t.done);
       base.sort((a, b) => a.date.localeCompare(b.date));
-      title.textContent = selectedDate ? (() => { const [,m,d] = selectedDate.split('-'); return `📋 ${parseInt(m)}월 ${parseInt(d)}일`; })() : '📋 전체 할 일';
-      if (base.length === 0) { list.innerHTML = `<li class="empty-msg">할 일이 없습니다 🎉</li>`; }
-      else {
+
+      if (selectedDate) {
+        const [, m, d] = selectedDate.split('-');
+        title.textContent = `📋 ${parseInt(m)}월 ${parseInt(d)}일`;
+      } else {
+        title.textContent = '📋 전체 할 일';
+      }
+
+      if (base.length === 0) {
+        list.innerHTML = `<li class="empty-msg">할 일이 없습니다 🎉</li>`;
+      } else {
         list.innerHTML = base.map(t => {
           const pri = t.priority || 'normal';
-          const priLabel = {high:'높음',normal:'보통',low:'낮음'}[pri];
+          const priLabel = { high: '높음', normal: '보통', low: '낮음' }[pri];
           const isOpen = expandedId === t.id;
-          const hasNote = (t.detail||'').trim().length > 0;
-          return `<li class="todo-item ${t.done?'done':''}" data-id="${t.id}">
+          const hasNote = (t.detail || '').trim().length > 0;
+
+          return `<li class="todo-item ${t.done ? 'done' : ''}" data-id="${t.id}">
             <div class="todo-main">
-              <input type="checkbox" ${t.done?'checked':''} onchange="toggle('${t.id}')" />
+              <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
               <div class="todo-info">
                 <div class="todo-text">${esc(t.text)}</div>
-                ${t.detail?`<div class="todo-memo-preview">${esc(t.detail.substring(0,60))}${t.detail.length>60?'...':''}</div>`:''}
+                ${t.detail ? `<div class="todo-memo-preview">${esc(t.detail.substring(0,60))}${t.detail.length>60?'...':''}</div>` : ''}
                 <div class="todo-meta">
                   <span class="todo-date">${fmtLabel(t.date)}</span>
                   <span class="pri-badge pri-${pri}">${priLabel}</span>
-                  ${t.time?`<span class="time-tag">⏰ ${esc(t.time)}</span>`:''}
-                  <span class="note-dot ${hasNote?'visible':''}">📝</span>
+                  ${t.time ? `<span class="time-tag">⏰ ${esc(t.time)}</span>` : ''}
+                  <span class="note-dot ${hasNote ? 'visible' : ''}">📝</span>
                 </div>
               </div>
-              <button class="expand-btn ${isOpen?'open':''}" onclick="toggleExpand('${t.id}')">▼</button>
+              <button class="expand-btn ${isOpen ? 'open' : ''}" onclick="toggleExpand('${t.id}')" title="상세 보기">▼</button>
               <button class="delete-btn" onclick="remove('${t.id}')">✕</button>
             </div>
-            <div class="todo-detail ${isOpen?'open':''}">
-              <div class="detail-row"><span class="detail-label">제목</span><input class="time-input" style="flex:1" type="text" value="${esc(t.text)}" oninput="updateField('${t.id}','text',this.value)" /></div>
-              <div class="detail-row"><span class="detail-label">우선순위</span>
-                <button class="pri-btn pri-btn-high${pri==='high'?' sel-high':''}" onclick="updateField('${t.id}','priority','high')">높음</button>
-                <button class="pri-btn pri-btn-normal${pri==='normal'?' sel-normal':''}" onclick="updateField('${t.id}','priority','normal')">보통</button>
-                <button class="pri-btn pri-btn-low${pri==='low'?' sel-low':''}" onclick="updateField('${t.id}','priority','low')">낮음</button>
+
+            <div class="todo-detail ${isOpen ? 'open' : ''}">
+              <div class="detail-row">
+                <span class="detail-label">제목</span>
+                <input class="time-input" style="flex:1" type="text" value="${esc(t.text)}"
+                  oninput="updateField('${t.id}','text',this.value)" />
               </div>
-              <div class="detail-row"><span class="detail-label">시간</span><input class="time-input" type="time" value="${esc(t.time||'')}" oninput="updateField('${t.id}','time',this.value)" /></div>
-              <div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="detail-label">메모</span><textarea class="memo-textarea" placeholder="상세 내용..." oninput="updateField('${t.id}','detail',this.value)">${esc(t.detail||'')}</textarea></div>
+              <div class="detail-row">
+                <span class="detail-label">우선순위</span>
+                <button class="pri-btn pri-btn-high${pri==='high'?' sel-high':''}"   onclick="updateField('${t.id}','priority','high')">높음</button>
+                <button class="pri-btn pri-btn-normal${pri==='normal'?' sel-normal':''}" onclick="updateField('${t.id}','priority','normal')">보통</button>
+                <button class="pri-btn pri-btn-low${pri==='low'?' sel-low':''}"    onclick="updateField('${t.id}','priority','low')">낮음</button>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">시간</span>
+                <input class="time-input" type="time" value="${esc(t.time||'')}"
+                  oninput="updateField('${t.id}','time',this.value)" />
+              </div>
+              <div class="detail-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                <span class="detail-label">메모</span>
+                <textarea class="memo-textarea" placeholder="일정에 대한 상세 내용을 입력하세요..."
+                  oninput="updateField('${t.id}','detail',this.value)">${esc(t.detail||'')}</textarea>
+              </div>
             </div>
           </li>`;
         }).join('');
       }
+
       const src = selectedDate ? todos.filter(t => t.date === selectedDate) : todos;
       const done = src.filter(t => t.done).length;
-      document.getElementById('summary').textContent = `전체 ${src.length}개 · 완료 ${done}개 · 미완료 ${src.length-done}개`;
+      document.getElementById('summary').textContent =
+        `전체 ${src.length}개 · 완료 ${done}개 · 미완료 ${src.length - done}개`;
     }
 
     function fmtLabel(dateStr) {
       if (!dateStr) return '';
-      const [y,m,d] = dateStr.split('-').map(Number);
-      return `${m}월 ${d}일 (${['일','월','화','수','목','금','토'][new Date(y,m-1,d).getDay()]})`;
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dows = ['일','월','화','수','목','금','토'];
+      return `${m}월 ${d}일 (${dows[new Date(y, m-1, d).getDay()]})`;
     }
 
+    // ══════════════════════════════════════
+    // 캘린더 렌더
+    // ══════════════════════════════════════
     function renderCalendar() {
       document.getElementById('cal-title').textContent = `${viewYear}년 ${viewMonth+1}월`;
       const grid = document.getElementById('cal-grid');
       const dows = ['일','월','화','수','목','금','토'];
       let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
       const firstDay = new Date(viewYear, viewMonth, 1).getDay();
       const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
       for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
       const dotMap = {};
-      todos.forEach(t => { if (!dotMap[t.date]) dotMap[t.date]={total:0,done:0}; dotMap[t.date].total++; if (t.done) dotMap[t.date].done++; });
+      todos.forEach(t => {
+        if (!dotMap[t.date]) dotMap[t.date] = { total: 0, done: 0 };
+        dotMap[t.date].total++;
+        if (t.done) dotMap[t.date].done++;
+      });
+
       for (let d = 1; d <= daysInMonth; d++) {
-        const m = String(viewMonth+1).padStart(2,'0'), dd = String(d).padStart(2,'0');
-        const dateStr = `${viewYear}-${m}-${dd}`, dow = (firstDay+d-1)%7, info = dotMap[dateStr];
+        const m = String(viewMonth+1).padStart(2,'0');
+        const dd = String(d).padStart(2,'0');
+        const dateStr = `${viewYear}-${m}-${dd}`;
+        const dow = (firstDay + d - 1) % 7;
+        const info = dotMap[dateStr];
+
         let dotHtml = '';
-        if (info) { const u=info.total-info.done; for(let i=0;i<Math.min(u,3);i++) dotHtml+=`<div class="dot"></div>`; for(let i=0;i<Math.min(info.done,3-Math.min(u,3));i++) dotHtml+=`<div class="dot done"></div>`; }
-        const cls = ['cal-day', dateStr===todayStr()?'today':'', dateStr===selectedDate?'selected':'', dow===0?'sunday':'', dow===6?'saturday':''].filter(Boolean).join(' ');
-        html += `<div class="${cls}" onclick="selectDate('${dateStr}')"><div class="day-num">${d}</div><div class="dot-row">${dotHtml}</div></div>`;
+        if (info) {
+          const u = info.total - info.done;
+          for (let i = 0; i < Math.min(u, 3); i++) dotHtml += `<div class="dot"></div>`;
+          for (let i = 0; i < Math.min(info.done, 3 - Math.min(u, 3)); i++) dotHtml += `<div class="dot done"></div>`;
+        }
+
+        const cls = ['cal-day',
+          dateStr === todayStr() ? 'today' : '',
+          dateStr === selectedDate ? 'selected' : '',
+          dow === 0 ? 'sunday' : '', dow === 6 ? 'saturday' : ''
+        ].filter(Boolean).join(' ');
+
+        html += `<div class="${cls}" onclick="selectDate('${dateStr}')">
+          <div class="day-num">${d}</div>
+          <div class="dot-row">${dotHtml}</div>
+        </div>`;
       }
       grid.innerHTML = html;
     }
 
-    function changeMonth(dir) { viewMonth+=dir; if(viewMonth>11){viewMonth=0;viewYear++;} if(viewMonth<0){viewMonth=11;viewYear--;} renderCalendar(); }
-
-    function showBriefing() {
-      const ts = todayStr();
-      const [y,m,d] = ts.split('-').map(Number);
-      document.getElementById('modal-date').textContent = `${y}년 ${m}월 ${d}일 (${['일','월','화','수','목','금','토'][new Date(y,m-1,d).getDay()]})`;
-      const todayTodos = todos.filter(t => t.date===ts && !t.done);
-      const overdue = todos.filter(t => t.date<ts && !t.done);
-      const totalDone = todos.filter(t => t.done).length;
-      _briefingTodayTodos = todayTodos; _briefingOverdue = overdue;
-      document.getElementById('modal-stats').innerHTML = `
-        <div class="stat-box"><div class="num">${todayTodos.length}</div><div class="label">오늘 할 일</div></div>
-        <div class="stat-box ${overdue.length>0?'danger':''}"><div class="num">${overdue.length}</div><div class="label">미완료 지난 일</div></div>
-        <div class="stat-box"><div class="num">${totalDone}</div><div class="label">완료됨</div></div>`;
-      document.getElementById('modal-today-list').innerHTML = todayTodos.length===0
-        ? `<div class="briefing-empty">오늘 예정된 할 일이 없어요 😊</div>`
-        : todayTodos.map(t => { const pri=t.priority||'normal'; const priLabel={high:'🔴 높음',normal:'🔵 보통',low:'⚪ 낮음'}[pri]; return `<div class="briefing-item"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><span>📌 ${esc(t.text)}</span><span style="font-size:0.72rem;color:#888;">${priLabel}${t.time?' · ⏰ '+esc(t.time):''}</span></div>${t.detail?`<div style="margin-top:5px;font-size:0.8rem;color:#777;white-space:pre-wrap;">${esc(t.detail)}</div>`:''}</div>`; }).join('');
-      const overdueSection = document.getElementById('modal-overdue-section');
-      if (overdue.length===0) { overdueSection.style.display='none'; }
-      else { overdueSection.style.display=''; document.getElementById('modal-overdue-list').innerHTML = overdue.map(t=>`<div class="briefing-item overdue">⚠️ ${esc(t.text)}<div class="b-date">${fmtLabel(t.date)}</div></div>`).join(''); }
-      document.getElementById('modal-overlay').classList.add('show');
-      startTTS();
+    function changeMonth(dir) {
+      viewMonth += dir;
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+      renderCalendar();
     }
 
-    function closeBriefing() { stopTTS(); document.getElementById('modal-overlay').classList.remove('show'); }
+    // ══════════════════════════════════════
+    // 브리핑 모달
+    // ══════════════════════════════════════
+    function showBriefing(autoRead = false) {
+      const ts = todayStr();
+      const [y, m, d] = ts.split('-').map(Number);
+      const dows = ['일','월','화','수','목','금','토'];
+      document.getElementById('modal-date').textContent =
+        `${y}년 ${m}월 ${d}일 (${dows[new Date(y, m-1, d).getDay()]})`;
 
+      const todayTodos = todos.filter(t => t.date === ts && !t.done);
+      const overdue    = todos.filter(t => t.date < ts  && !t.done);
+      const totalDone  = todos.filter(t => t.done).length;
+
+      _briefingTodayTodos = todayTodos;
+      _briefingOverdue    = overdue;
+
+      document.getElementById('modal-stats').innerHTML = `
+        <div class="stat-box"><div class="num">${todayTodos.length}</div><div class="label">오늘 할 일</div></div>
+        <div class="stat-box ${overdue.length > 0 ? 'danger' : ''}">
+          <div class="num">${overdue.length}</div><div class="label">미완료 지난 일</div>
+        </div>
+        <div class="stat-box"><div class="num">${totalDone}</div><div class="label">완료됨</div></div>`;
+
+      document.getElementById('modal-today-list').innerHTML = todayTodos.length === 0
+        ? `<div class="briefing-empty">오늘 예정된 할 일이 없어요 😊</div>`
+        : todayTodos.map(t => {
+            const pri = t.priority || 'normal';
+            const priLabel = { high: '🔴 높음', normal: '🔵 보통', low: '⚪ 낮음' }[pri];
+            return `<div class="briefing-item">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span>📌 ${esc(t.text)}</span>
+                <span style="font-size:0.72rem;color:#888;">${priLabel}${t.time ? ' · ⏰ '+esc(t.time) : ''}</span>
+              </div>
+              ${t.detail ? `<div style="margin-top:5px;font-size:0.8rem;color:#777;white-space:pre-wrap;">${esc(t.detail)}</div>` : ''}
+            </div>`;
+          }).join('');
+
+      const overdueSection = document.getElementById('modal-overdue-section');
+      if (overdue.length === 0) {
+        overdueSection.style.display = 'none';
+      } else {
+        overdueSection.style.display = '';
+        document.getElementById('modal-overdue-list').innerHTML =
+          overdue.map(t => `<div class="briefing-item overdue">
+            ⚠️ ${esc(t.text)}<div class="b-date">${fmtLabel(t.date)}</div>
+          </div>`).join('');
+      }
+
+      document.getElementById('modal-overlay').classList.add('show');
+
+      prefetchTTS();
+    }
+
+    function closeBriefing() {
+      stopTTS();
+      document.getElementById('modal-overlay').classList.remove('show');
+    }
+
+    // 모달 버튼 이벤트 (iOS 호환)
     function addTap(id, fn) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -424,65 +840,124 @@
       el.addEventListener('click', fn);
     }
 
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modal-overlay')) closeBriefing();
+    }
+
+    // ══════════════════════════════════════
+    // TTS
+    // ══════════════════════════════════════
     function buildBriefingText() {
       const h = new Date().getHours();
-      const greeting = h < 11 ? '좋은 아침이에요' : '안녕하세요';
+      const greeting = h < 11 ? '좋은 아침이에요' : h < 18 ? '안녕하세요' : '안녕하세요';
       let text = `${greeting}. `;
-      if (_briefingTodayTodos.length===0 && _briefingOverdue.length===0) {
+
+      if (_briefingTodayTodos.length === 0 && _briefingOverdue.length === 0) {
         text += '오늘은 예정된 할 일이 없어요. 좋은 하루 보내세요!';
       } else {
-        if (_briefingTodayTodos.length>0) { text += `오늘 할 일이 ${_briefingTodayTodos.length}개 있습니다. `; _briefingTodayTodos.forEach((t,i)=>{ text+=`${i+1}번, ${t.text}. `; if(t.detail) text+=`메모: ${t.detail}. `; }); }
-        if (_briefingOverdue.length>0) { text += `주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. `; _briefingOverdue.forEach((t,i)=>{ text+=`${i+1}번, ${t.text}. `; if(t.detail) text+=`메모: ${t.detail}. `; }); }
+        if (_briefingTodayTodos.length > 0) {
+          text += `오늘 할 일이 ${_briefingTodayTodos.length}개 있습니다. `;
+          _briefingTodayTodos.forEach((t, i) => {
+            text += `${i+1}번, ${t.text}. `;
+            if (t.detail) text += `메모: ${t.detail}. `;
+          });
+        }
+        if (_briefingOverdue.length > 0) {
+          text += `주의! 완료하지 못한 지난 일정이 ${_briefingOverdue.length}개 있습니다. `;
+          _briefingOverdue.forEach((t, i) => {
+            text += `${i+1}번, ${t.text}. `;
+            if (t.detail) text += `메모: ${t.detail}. `;
+          });
+        }
       }
       return text;
     }
 
     const ELEVEN_API_KEY = 'a47960161d014a167261f504c3d9e72f9522b47769e115902e88d706828fd702';
     const ELEVEN_VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
-    let audioCtx = null, currentSource = null;
+    let audioCtx = null;
+    let currentSource = null;
+    let _prefetchedBlob = null;
 
-    async function startTTS() {
+    // 모달 열릴 때 백그라운드에서 음성 생성 → 완료 후 재생 버튼 자동 클릭
+    async function prefetchTTS() {
       const statusEl = document.getElementById('tts-status');
       const text = buildBriefingText();
       if (!text) return;
-      if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+
+      _prefetchedBlob = null;
       statusEl.textContent = '⏳ 음성 생성 중...';
+
       try {
         const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`, {
           method: 'POST',
-          headers: { 'Accept':'audio/mpeg', 'Content-Type':'application/json', 'xi-api-key':ELEVEN_API_KEY },
-          body: JSON.stringify({ text, model_id:'eleven_multilingual_v2', voice_settings:{ stability:0.5, similarity_boost:0.75 } })
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': ELEVEN_API_KEY
+          },
+          body: JSON.stringify({
+            text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+          })
         });
+
+        if (!res.ok) throw new Error('API 오류 ' + res.status);
+
+        _prefetchedBlob = await res.blob();
+        statusEl.textContent = '✅ 생성완료 - 재생 시작 중...';
+
+        // 생성 완료 후 재생 버튼 자동 클릭
+        const playBtn = document.getElementById('tts-play-btn');
+        if (playBtn) playBtn.click();
+
+      } catch (e) {
+        console.error(e);
+        _prefetchedBlob = null;
+        statusEl.textContent = '▶ 재생 버튼을 눌러 브리핑을 들어보세요';
+      }
+    }
+
+    async function startTTS() {
+      const statusEl = document.getElementById('tts-status');
+
+      // 이미 생성된 blob이 있으면 바로 재생
+      if (_prefetchedBlob) {
+        const blob = _prefetchedBlob;
+        _prefetchedBlob = null;
+        await playBlob(blob, statusEl);
+        return;
+      }
+
+      // blob 없으면 직접 생성 후 재생
+      const text = buildBriefingText();
+      if (!text) return;
+
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+      }
+
+      statusEl.textContent = '⏳ 음성 생성 중...';
+
+      try {
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': ELEVEN_API_KEY
+          },
+          body: JSON.stringify({
+            text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+          })
+        });
+
         if (!res.ok) throw new Error('API 오류 ' + res.status);
         const blob = await res.blob();
-
-        // AudioContext 방식 먼저 시도
-        if (audioCtx) {
-          try {
-            if (audioCtx.state === 'suspended') await audioCtx.resume();
-            if (audioCtx.state !== 'running') throw new Error('AudioContext not running');
-            const arrayBuffer = await blob.arrayBuffer();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            if (currentSource) { try { currentSource.stop(); } catch(e) {} }
-            const source = audioCtx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(audioCtx.destination);
-            source.onended = () => { statusEl.textContent = '✅ 재생 완료'; currentSource = null; };
-            source.start(0);
-            currentSource = source;
-            statusEl.textContent = '🔊 음성 재생 중...';
-            return;
-          } catch(e) { console.warn('AudioContext 실패, Audio로 전환:', e); }
-        }
-
-        // 폴백: HTML Audio
-        const audio = new Audio();
-        currentSource = audio;
-        audio.src = URL.createObjectURL(blob);
-        audio.onplay = () => { statusEl.textContent = '🔊 음성 재생 중...'; };
-        audio.onended = () => { statusEl.textContent = '✅ 재생 완료'; };
-        audio.onerror = () => { statusEl.textContent = '❌ 재생 오류'; };
-        await audio.play();
+        await playBlob(blob, statusEl);
 
       } catch (e) {
         console.error(e);
@@ -490,66 +965,181 @@
       }
     }
 
+    async function playBlob(blob, statusEl) {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+      }
+
+      // AudioContext 방식 먼저 시도
+      if (audioCtx) {
+        try {
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
+          if (audioCtx.state !== 'running') throw new Error('AudioContext not running');
+          const arrayBuffer = await blob.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          if (currentSource) { try { currentSource.stop(); } catch(e) {} }
+          const source = audioCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(audioCtx.destination);
+          source.onended = () => { statusEl.textContent = '✅ 재생 완료'; currentSource = null; };
+          source.start(0);
+          currentSource = source;
+          statusEl.textContent = '🔊 음성 재생 중...';
+          return;
+        } catch(e) {
+          console.warn('AudioContext 실패, Audio로 전환:', e);
+        }
+      }
+
+      // 폴백: HTML Audio
+      const audio = new Audio();
+      currentSource = audio;
+      audio.src = URL.createObjectURL(blob);
+      audio.onplay = () => { statusEl.textContent = '🔊 음성 재생 중...'; };
+      audio.onended = () => { statusEl.textContent = '✅ 재생 완료'; };
+      audio.onerror = () => { statusEl.textContent = '❌ 재생 오류'; };
+      try {
+        await audio.play();
+      } catch(e) {
+        console.warn('audio.play() 실패:', e);
+        statusEl.textContent = '▶ 재생 버튼을 눌러 브리핑을 들어보세요';
+      }
+    }
+
     function stopTTS() {
       if (currentSource) {
-        try { if (typeof currentSource.stop==='function') currentSource.stop(); else currentSource.pause(); } catch(e) {}
+        try {
+          if (typeof currentSource.stop === 'function') {
+            currentSource.stop();
+          } else {
+            currentSource.pause();
+          }
+        } catch(e) {}
         currentSource = null;
       }
       const el = document.getElementById('tts-status');
       if (el) el.textContent = '⏹ 중지됨';
     }
 
+    // ══════════════════════════════════════
+    // 오전 7시 자동 브리핑
+    // ══════════════════════════════════════
     function checkBriefingTime() {
-      const now = new Date(), todayKey = 'briefing_' + todayStr();
-      if (now.getHours()===7 && now.getMinutes()===0 && !localStorage.getItem(todayKey)) { localStorage.setItem(todayKey,'1'); showBriefing(); }
+      const now = new Date();
+      const todayKey = 'briefing_' + todayStr();
+      if (now.getHours() === 7 && now.getMinutes() === 0 && !localStorage.getItem(todayKey)) {
+        localStorage.setItem(todayKey, '1');
+        showBriefing(true);
+      }
     }
     setInterval(checkBriefingTime, 30000);
 
     async function init() {
+      // 알림 탭으로 열릴 때 AudioContext 즉시 잠금 해제
       if (new URLSearchParams(window.location.search).get('briefing') === '1') {
         try {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const buf = audioCtx.createBuffer(1,1,22050);
+          const buf = audioCtx.createBuffer(1, 1, 22050);
           const src = audioCtx.createBufferSource();
           src.buffer = buf; src.connect(audioCtx.destination); src.start(0);
         } catch(e) {}
       }
+
       renderCalendar();
       await loadTodos();
-      const now = new Date(), todayKey = 'briefing_' + todayStr();
+
+      const now = new Date();
+      const todayKey = 'briefing_' + todayStr();
+
       if (new URLSearchParams(window.location.search).get('briefing') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
-        showBriefing(); return;
+        showBriefing(true);
+        return;
       }
-      if (now.getHours()>=7 && !localStorage.getItem(todayKey)) { localStorage.setItem(todayKey,'1'); showBriefing(); }
+
+      if (now.getHours() >= 7 && !localStorage.getItem(todayKey)) {
+        localStorage.setItem(todayKey, '1');
+        showBriefing(true);
+      }
     }
 
-    function requestNotifPermission() { Notification.requestPermission().then(p => { if(p==='granted') document.getElementById('notif-banner').classList.add('hidden'); }); }
-
-    let deferredInstallPrompt = null;
-    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstallPrompt=e; document.getElementById('install-banner').classList.remove('hidden'); });
-    function installPWA() { if(!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(()=>{ deferredInstallPrompt=null; document.getElementById('install-banner').classList.add('hidden'); }); }
-    window.addEventListener('appinstalled', () => { document.getElementById('install-banner').classList.add('hidden'); });
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        if (typeof Notification !== 'undefined' && Notification.permission === 'default') document.getElementById('notif-banner').classList.remove('hidden');
+    // ══════════════════════════════════════
+    // 브라우저 알림
+    // ══════════════════════════════════════
+    function requestNotifPermission() {
+      Notification.requestPermission().then(perm => {
+        if (perm === 'granted') {
+          document.getElementById('notif-banner').classList.add('hidden');
+        }
       });
     }
 
-    function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    // ══════════════════════════════════════
+    // PWA 설치
+    // ══════════════════════════════════════
+    let deferredInstallPrompt = null;
 
-    document.getElementById('todo-input').addEventListener('keydown', e => { if(e.key==='Enter') addTodo(); });
-    document.getElementById('todo-date').addEventListener('change', e => { selectedDate=e.target.value||null; renderCalendar(); renderTodos(); });
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      document.getElementById('install-banner').classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(() => {
+        deferredInstallPrompt = null;
+        document.getElementById('install-banner').classList.add('hidden');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('install-banner').classList.add('hidden');
+    });
+
+    // ══════════════════════════════════════
+    // 서비스 워커 등록
+    // ══════════════════════════════════════
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(() => {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+          document.getElementById('notif-banner').classList.remove('hidden');
+        }
+      });
+    }
+
+    // ══════════════════════════════════════
+    // 공통 유틸
+    // ══════════════════════════════════════
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.getElementById('todo-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTodo();
+    });
+
+    document.getElementById('todo-date').addEventListener('change', e => {
+      selectedDate = e.target.value || null;
+      renderCalendar(); renderTodos();
+    });
+
     document.getElementById('todo-date').value = todayStr();
 
+    // 모달 버튼 이벤트 연결
     addTap('modal-close-btn', closeBriefing);
     addTap('modal-confirm-btn', closeBriefing);
     addTap('tts-play-btn', startTTS);
     addTap('tts-stop-btn', stopTTS);
 
-    document.getElementById('modal-overlay').addEventListener('touchend', function(e) { if(e.target===this){e.preventDefault();closeBriefing();} }, { passive: false });
-    document.getElementById('modal-overlay').addEventListener('click', function(e) { if(e.target===this) closeBriefing(); });
+    // 오버레이 클릭 시 닫기 (모달 바깥 터치)
+    document.getElementById('modal-overlay').addEventListener('touchend', function(e) {
+      if (e.target === this) { e.preventDefault(); closeBriefing(); }
+    }, { passive: false });
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeBriefing();
+    });
 
     init();
   </script>
