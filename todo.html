@@ -68,36 +68,42 @@
 
     .cal-grid {
       display: grid; grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: 28px repeat(6, 1fr);
-      gap: 0; height: calc(100vw - 32px);
-      max-height: 380px;
+      grid-template-rows: 24px repeat(6, 1fr);
+      gap: 1px; background: #eee;
+      height: calc(100vw * 1.1);
+      max-height: 480px;
     }
     .cal-dow {
-      text-align: center; font-size: 0.75rem; font-weight: 600;
+      text-align: center; font-size: 0.72rem; font-weight: 600;
       color: #999; display: flex; align-items: center; justify-content: center;
+      background: #fff;
     }
 
     .cal-day {
-      position: relative; text-align: center;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 0.92rem; color: #333;
-      transition: background 0.15s; border-radius: 12px; margin: 2px;
+      position: relative;
+      display: flex; flex-direction: column; align-items: stretch;
+      cursor: pointer; font-size: 0.82rem; color: #333;
+      background: #fff; padding: 3px 2px 2px; overflow: hidden;
     }
-    .cal-day:hover { background: #f0eeff; }
-    .cal-day.empty { cursor: default; }
-    .cal-day.empty:hover { background: none; }
+    .cal-day:active { background: #f0eeff; }
+    .cal-day.empty { cursor: default; background: #fafafa; }
     .cal-day.today .day-num {
       background: #6c63ff; color: #fff; border-radius: 50%;
-      width: 32px; height: 32px; display: flex;
-      align-items: center; justify-content: center;
+      width: 22px; height: 22px; display: flex;
+      align-items: center; justify-content: center; font-size: 0.75rem;
     }
-    .cal-day.selected { background: #ede9ff; }
+    .cal-day.selected { background: #f0eeff; }
     .cal-day.sunday .day-num { color: #e74c3c; }
     .cal-day.saturday .day-num { color: #3498db; }
-    .day-num { font-size: 0.92rem; line-height: 1; }
-    .dot-row { display: flex; justify-content: center; gap: 2px; margin-top: 4px; }
-    .dot { width: 5px; height: 5px; border-radius: 50%; background: #6c63ff; }
-    .dot.done { background: #ccc; }
+    .day-num { font-size: 0.75rem; line-height: 1; text-align: center; margin-bottom: 2px; }
+    .cal-events { display: flex; flex-direction: column; gap: 1px; overflow: hidden; flex: 1; }
+    .cal-ev {
+      font-size: 0.52rem; line-height: 1.3; padding: 1px 2px;
+      border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: #e8e4ff; color: #5a52d5;
+    }
+    .cal-ev.done { background: #f0f0f0; color: #bbb; text-decoration: line-through; }
+    .cal-ev.overdue { background: #ffe8e8; color: #d44; }
 
     /* ── 할일 카드 ── */
     .todo-card {
@@ -330,7 +336,7 @@
       .layout { flex-direction: row; gap: 24px; max-width: 900px; }
       .calendar-card { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex: 1 1 320px; border: none; padding: 24px; }
       .todo-card { border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex: 1 1 300px; padding: 24px; }
-      .cal-grid { height: 340px; max-height: none; }
+      .cal-grid { height: 420px; max-height: none; }
     }
   </style>
 </head>
@@ -702,11 +708,11 @@
       const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
       for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
 
-      const dotMap = {};
+      const todoMap = {};
+      const ts = todayStr();
       todos.forEach(t => {
-        if (!dotMap[t.date]) dotMap[t.date] = { total: 0, done: 0 };
-        dotMap[t.date].total++;
-        if (t.done) dotMap[t.date].done++;
+        if (!todoMap[t.date]) todoMap[t.date] = [];
+        todoMap[t.date].push(t);
       });
 
       for (let d = 1; d <= daysInMonth; d++) {
@@ -714,13 +720,13 @@
         const dd = String(d).padStart(2,'0');
         const dateStr = `${viewYear}-${m}-${dd}`;
         const dow = (firstDay + d - 1) % 7;
-        const info = dotMap[dateStr];
-        let dotHtml = '';
-        if (info) {
-          const u = info.total - info.done;
-          for (let i = 0; i < Math.min(u, 3); i++) dotHtml += `<div class="dot"></div>`;
-          for (let i = 0; i < Math.min(info.done, 3 - Math.min(u, 3)); i++) dotHtml += `<div class="dot done"></div>`;
-        }
+        const items = todoMap[dateStr] || [];
+        let evHtml = '';
+        items.slice(0, 3).forEach(t => {
+          const cls = t.done ? 'cal-ev done' : (t.date < ts && !t.done ? 'cal-ev overdue' : 'cal-ev');
+          evHtml += `<div class="${cls}">${esc(t.text)}</div>`;
+        });
+        if (items.length > 3) evHtml += `<div class="cal-ev" style="color:#999;background:#f5f5f5;">+${items.length - 3}</div>`;
         const cls = ['cal-day',
           dateStr === todayStr() ? 'today' : '',
           dateStr === selectedDate ? 'selected' : '',
@@ -728,7 +734,7 @@
         ].filter(Boolean).join(' ');
         html += `<div class="${cls}" onclick="selectDate('${dateStr}')">
           <div class="day-num">${d}</div>
-          <div class="dot-row">${dotHtml}</div>
+          <div class="cal-events">${evHtml}</div>
         </div>`;
       }
       const totalCells = firstDay + daysInMonth;
