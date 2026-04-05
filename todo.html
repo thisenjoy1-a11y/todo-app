@@ -100,10 +100,13 @@
     .cal-ev {
       font-size: 0.52rem; line-height: 1.3; padding: 1px 2px;
       border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      background: #e8e4ff; color: #5a52d5;
+      background: #dbeafe; color: #2563eb;
     }
+    .cal-ev.pri-high { background: #fecaca; color: #dc2626; }
+    .cal-ev.pri-normal { background: #dbeafe; color: #2563eb; }
+    .cal-ev.pri-low { background: #f3f4f6; color: #9ca3af; }
     .cal-ev.done { background: #f0f0f0; color: #bbb; text-decoration: line-through; }
-    .cal-ev.overdue { background: #ffe8e8; color: #d44; }
+    .cal-ev.overdue { background: #fecaca; color: #dc2626; }
 
     /* ── 할일 카드 ── */
     .todo-card {
@@ -723,7 +726,10 @@
         const items = todoMap[dateStr] || [];
         let evHtml = '';
         items.slice(0, 3).forEach(t => {
-          const cls = t.done ? 'cal-ev done' : (t.date < ts && !t.done ? 'cal-ev overdue' : 'cal-ev');
+          let cls = 'cal-ev';
+          if (t.done) cls = 'cal-ev done';
+          else if (t.date < ts) cls = 'cal-ev overdue';
+          else cls = `cal-ev pri-${t.priority || 'normal'}`;
           evHtml += `<div class="${cls}">${esc(t.text)}</div>`;
         });
         if (items.length > 3) evHtml += `<div class="cal-ev" style="color:#999;background:#f5f5f5;">+${items.length - 3}</div>`;
