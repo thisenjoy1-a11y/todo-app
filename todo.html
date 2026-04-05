@@ -726,10 +726,7 @@
         const items = todoMap[dateStr] || [];
         let evHtml = '';
         items.slice(0, 3).forEach(t => {
-          let cls = 'cal-ev';
-          if (t.done) cls = 'cal-ev done';
-          else if (t.date < ts) cls = 'cal-ev overdue';
-          else cls = `cal-ev pri-${t.priority || 'normal'}`;
+          let cls = t.done ? 'cal-ev done' : `cal-ev pri-${t.priority || 'normal'}`;
           evHtml += `<div class="${cls}">${esc(t.text)}</div>`;
         });
         if (items.length > 3) evHtml += `<div class="cal-ev" style="color:#999;background:#f5f5f5;">+${items.length - 3}</div>`;
