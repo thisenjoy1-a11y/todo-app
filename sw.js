@@ -1,4 +1,4 @@
-const CACHE = 'todo-calendar-v1';
+const CACHE = 'todo-calendar-v2';
 const FILES = ['./todo.html', './manifest.json', './icon.svg', './sw.js'];
 
 // 설치: 파일 캐시
